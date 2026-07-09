@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const { Schedule, Client, Employee, History, Confirmation } = require('../config/database');
+const { User, History } = require('../config/database');
 const { generateToken } = require('../config/jwt');
 
 const authController = {
@@ -23,10 +23,16 @@ const authController = {
         return res.status(401).json({ error: 'Email ou senha inválidos' });
       }
 
-      const token = generateToken(user);
+      // CORREÇÃO: usar _id do MongoDB
+      const token = generateToken({
+        id: user._id,
+        email: user.email,
+        role: user.role,
+        name: user.name
+      });
 
       await History.create({
-        user_id: user.id,
+        user_id: user._id,
         action: 'login',
         new_value: 'Login realizado',
         timestamp: new Date()
@@ -43,7 +49,7 @@ const authController = {
       });
     } catch (error) {
       console.error('Erro no login:', error);
-      return res.status(500).json({ error: 'Erro interno do servidor' });
+      return res.status(500).json({ error: 'Erro interno do servidor: ' + error.message });
     }
   },
 
@@ -64,7 +70,7 @@ const authController = {
       });
     } catch (error) {
       console.error('Erro ao buscar usuário:', error);
-      return res.status(500).json({ error: 'Erro interno do servidor' });
+      return res.status(500).json({ error: error.message });
     }
   },
 
@@ -90,7 +96,7 @@ const authController = {
       return res.json({ message: 'Senha alterada com sucesso' });
     } catch (error) {
       console.error('Erro ao alterar senha:', error);
-      return res.status(500).json({ error: 'Erro interno do servidor' });
+      return res.status(500).json({ error: error.message });
     }
   }
 };
