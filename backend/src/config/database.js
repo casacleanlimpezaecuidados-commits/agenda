@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const { Schedule, Client, Employee, History, Confirmation } = require('../config/database');
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://casacleanlimpezaecuidados_db_user:QXZxdOPjynmzsdUz@casa-clean.ofmuscx.mongodb.net/casa-clean?retryWrites=true&w=majority&appName=casa-clean';
 
@@ -108,7 +107,6 @@ async function initializeDatabase() {
   try {
     await connectDatabase();
     
-    // Verificar se já existe admin
     const adminExists = await User.findOne({ email: 'admin@casaclean.com' });
     
     if (!adminExists) {
