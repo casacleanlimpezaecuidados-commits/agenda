@@ -1,7 +1,6 @@
-node_modules/
-dist/
-.env
-backend/src/data/sessions/
-backend/src/data/logs/
-*.log
-.DS_Store
+node_modules/ 
+dist/ 
+.env 
+backend/src/data/sessions/ 
+backend/src/data/logs/ 
+*.log 
