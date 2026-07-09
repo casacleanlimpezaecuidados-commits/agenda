@@ -1,4 +1,4 @@
-const { Schedule, Employee, History, Confirmation } = require('../config/database');
+const { Schedule, Client, Employee, History, Confirmation } = require('../config/database');
 
 const dashboardController = {
   async getDashboard(req, res) {

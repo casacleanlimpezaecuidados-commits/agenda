@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { Schedule, Client, Employee, History, Confirmation } = require('../config/database');
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://casacleanlimpezaecuidados_db_user:QXZxdOPjynmzsdUz@casa-clean.ofmuscx.mongodb.net/casa-clean?retryWrites=true&w=majority&appName=casa-clean';
 

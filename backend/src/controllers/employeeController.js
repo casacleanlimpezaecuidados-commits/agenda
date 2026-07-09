@@ -1,4 +1,4 @@
-const { Employee, Schedule, History } = require('../config/database');
+const { Schedule, Client, Employee, History, Confirmation } = require('../config/database');
 
 const employeeController = {
   async list(req, res) {

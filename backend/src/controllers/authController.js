@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const { User, History } = require('../config/database');
+const { Schedule, Client, Employee, History, Confirmation } = require('../config/database');
 const { generateToken } = require('../config/jwt');
 
 const authController = {
