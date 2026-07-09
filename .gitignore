@@ -4,3 +4,7 @@ dist/
 backend/src/data/sessions/ 
 backend/src/data/logs/ 
 *.log 
+backend/.wwebjs_cache/ 
+credentials.json 
+backend/src/data/backups/ 
+backend/src/data/database.json 
