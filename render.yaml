@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: casa-clean-agenda
+    env: node
+    buildCommand: npm install && cd backend && npm install && cd ../frontend && npm install && npm run build
+    startCommand: cd backend && node src/server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3000"
+      - key: JWT_SECRET
+        value: casa_clean_secret_2026_producao
+      - key: RENDER
+        value: "true"

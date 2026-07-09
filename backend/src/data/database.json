@@ -1,0 +1,1123 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Administrador",
+      "email": "admin@casaclean.com",
+      "password": "$2a$10$6kdF5o3OaV9Yvt7dQqVmDOgcDCx6.3ThBXxkLaPF9CdxCBNvUDtPW",
+      "role": "admin",
+      "active": true,
+      "created_at": "2026-07-01T22:53:40.456Z"
+    }
+  ],
+  "clients": [
+    {
+      "id": 1,
+      "name": "3T Construções - Andreza / Leidiane",
+      "phone": "(31) 8709-1875",
+      "email": "",
+      "address": "",
+      "neighborhood": "",
+      "city": "",
+      "state": "MG",
+      "notes": "06x na semana Segunda a Sexta | 15 em 15 dias aos Sábado",
+      "addresses": [
+        {
+          "id": 1,
+          "street": "Rua Piauí, nº 338",
+          "neighborhood": "São Sebastião",
+          "city": "Mariana-MG",
+          "state": "MG",
+          "reference": "",
+          "daysOfWeek": [
+            "Segunda"
+          ]
+        },
+        {
+          "id": 2,
+          "street": "Rua Cinco de Junho, nº 193",
+          "neighborhood": "Vila Maquiné",
+          "city": "Mariana-MG",
+          "state": "MG",
+          "reference": "",
+          "daysOfWeek": [
+            "Terça"
+          ]
+        },
+        {
+          "id": 3,
+          "street": "Rua José Vicente de Souza, nº 508-A",
+          "neighborhood": "São Cristóvão",
+          "city": "Mariana-MG",
+          "state": "MG",
+          "reference": "",
+          "daysOfWeek": [
+            "Terça"
+          ]
+        },
+        {
+          "id": 4,
+          "street": "Rua Amazonas, nº 130-A",
+          "neighborhood": "São Sebastião",
+          "city": "Mariana-MG",
+          "state": "MG",
+          "reference": "",
+          "daysOfWeek": [
+            "Quarta"
+          ]
+        },
+        {
+          "id": 5,
+          "street": "Av. dos Pinheiros, nº 22-B",
+          "neighborhood": "Jardim dos Inconfidentes",
+          "city": "Mariana-MG",
+          "state": "MG",
+          "reference": "",
+          "daysOfWeek": [
+            "Quarta"
+          ]
+        },
+        {
+          "id": 6,
+          "street": "Rua Lucy de Moraes, nº 175",
+          "neighborhood": "Santana",
+          "city": "Mariana-MG",
+          "state": "MG",
+          "reference": "",
+          "daysOfWeek": [
+            "Quinta"
+          ]
+        },
+        {
+          "id": 7,
+          "street": "Rua São Jorge, nº 540",
+          "neighborhood": "São Sebastião",
+          "city": "Mariana-MG",
+          "state": "MG",
+          "reference": "",
+          "daysOfWeek": [
+            "Quinta"
+          ]
+        },
+        {
+          "id": 8,
+          "street": "Rua Roraima, nº 55",
+          "neighborhood": "Colina",
+          "city": "Mariana-MG",
+          "state": "MG",
+          "reference": "",
+          "daysOfWeek": [
+            "Sexta"
+          ]
+        }
+      ],
+      "active": true,
+      "created_at": "2026-07-02T23:40:23.774Z",
+      "updated_at": "2026-07-03T16:24:35.609Z"
+    },
+    {
+      "id": 2,
+      "name": "3Geo Consultoria Élida Gomes",
+      "phone": "(31) 97121-7352",
+      "email": "",
+      "address": "",
+      "neighborhood": "",
+      "city": "",
+      "state": "MG",
+      "notes": "03x na semana Segunda, Quarta e Sexta",
+      "addresses": [
+        {
+          "id": 1,
+          "street": "Rua José Vicente de Souza, 81 - Apto 101",
+          "neighborhood": "São Cristóvão",
+          "city": "Mariana-MG",
+          "state": "MG",
+          "reference": "",
+          "daysOfWeek": [
+            "Segunda",
+            "Quarta",
+            "Sexta"
+          ]
+        }
+      ],
+      "active": true,
+      "created_at": "2026-07-03T13:36:41.281Z",
+      "updated_at": "2026-07-03T16:24:46.314Z"
+    },
+    {
+      "id": 3,
+      "name": "ALTTO ENGENHARIA LTDA/Gabriela",
+      "phone": "(31) 9975-5944",
+      "email": "",
+      "address": "",
+      "neighborhood": "",
+      "city": "",
+      "state": "MG",
+      "notes": "01x por Mês",
+      "addresses": [
+        {
+          "id": 1,
+          "street": "Rua Platina, 30",
+          "neighborhood": "Morro Santana",
+          "city": "Mariana-MG",
+          "state": "MG",
+          "reference": "",
+          "daysOfWeek": []
+        }
+      ],
+      "active": true,
+      "created_at": "2026-07-03T14:47:38.126Z",
+      "updated_at": "2026-07-03T16:24:55.817Z"
+    },
+    {
+      "id": 4,
+      "name": "Aposvale-Ana",
+      "phone": "(31) 98778-4326",
+      "email": "",
+      "address": "",
+      "neighborhood": "",
+      "city": "",
+      "state": "MG",
+      "notes": "Meia Diária",
+      "addresses": [
+        {
+          "id": 1,
+          "street": "Rua Jorge Marques, 187",
+          "neighborhood": "Colina",
+          "city": "Mariana-MG",
+          "state": "MG",
+          "reference": "",
+          "daysOfWeek": []
+        }
+      ],
+      "active": true,
+      "created_at": "2026-07-03T15:06:05.319Z",
+      "updated_at": "2026-07-03T16:25:06.174Z"
+    },
+    {
+      "id": 5,
+      "name": "Compasso - João Cândido",
+      "phone": "(31) 9589-7334",
+      "email": "",
+      "address": "",
+      "neighborhood": "",
+      "city": "",
+      "state": "MG",
+      "notes": "Atendimento à Tarde | Meia Diaria",
+      "addresses": [
+        {
+          "id": 1,
+          "street": "Rua Wenceslau Brás, 34",
+          "neighborhood": "Centro",
+          "city": "Mariana-MG",
+          "state": "MG",
+          "reference": "",
+          "daysOfWeek": []
+        },
+        {
+          "id": 2,
+          "street": "Rua Ipanema, 3030 - Apto 202",
+          "neighborhood": "Nossa Senhora Aparecida",
+          "city": "Mariana-MG",
+          "state": "MG",
+          "reference": "",
+          "daysOfWeek": []
+        }
+      ],
+      "active": true,
+      "created_at": "2026-07-03T15:17:37.996Z",
+      "updated_at": "2026-07-03T16:25:17.432Z"
+    },
+    {
+      "id": 6,
+      "name": "Condominio - Jordana Souza",
+      "phone": "(31) 8720-3259",
+      "email": "",
+      "address": "",
+      "neighborhood": "",
+      "city": "",
+      "state": "MG",
+      "notes": "01 vez por Semana Quinta",
+      "addresses": [
+        {
+          "id": 1,
+          "street": "Rua Luciano Francisco Pereira 200",
+          "neighborhood": "Nossa Senhora de Lourdes",
+          "city": "Ouro Preto-MG",
+          "state": "MG",
+          "reference": "",
+          "daysOfWeek": [
+            "Quinta"
+          ]
+        }
+      ],
+      "active": true,
+      "created_at": "2026-07-03T15:46:51.732Z",
+      "updated_at": "2026-07-03T16:25:58.393Z"
+    },
+    {
+      "id": 7,
+      "name": "Ellen Boemme",
+      "phone": "(31) 9352-6543",
+      "email": "",
+      "address": "",
+      "neighborhood": "",
+      "city": "",
+      "state": "MG",
+      "notes": "Apartamento - 02x na semana Terça e Sexta | 15 em 15 dias na Loja",
+      "addresses": [
+        {
+          "id": 1,
+          "street": "Rua Pollux, 255 - Apto, 102",
+          "neighborhood": "Cruzeiro Do Sul",
+          "city": "Mariana-MG",
+          "state": "MG",
+          "reference": "",
+          "daysOfWeek": [
+            "Terça",
+            "Sexta"
+          ]
+        },
+        {
+          "id": 2,
+          "street": "Rua Direita, 19",
+          "neighborhood": "Centro",
+          "city": "Mariana-MG",
+          "state": "MG",
+          "reference": "",
+          "daysOfWeek": []
+        }
+      ],
+      "active": true,
+      "created_at": "2026-07-03T16:02:18.109Z",
+      "updated_at": "2026-07-03T22:27:13.154Z"
+    },
+    {
+      "id": 8,
+      "name": "GEOSOL - UNIDADE 1799 - Paulo Henrique ADM",
+      "phone": "(31) 9559-8670",
+      "email": "",
+      "address": "",
+      "neighborhood": "",
+      "city": "",
+      "state": "MG",
+      "notes": "Segunda a Sexta",
+      "addresses": [
+        {
+          "id": 1,
+          "street": "Rua da Lapa Queimada, 52",
+          "neighborhood": "Antônio Pereira",
+          "city": "Ouro Preto-MG",
+          "state": "MG",
+          "reference": "",
+          "daysOfWeek": [
+            "Segunda",
+            "Terça",
+            "Quarta",
+            "Quinta",
+            "Sexta"
+          ]
+        }
+      ],
+      "active": true,
+      "created_at": "2026-07-03T16:23:59.670Z",
+      "updated_at": "2026-07-03T16:29:30.107Z"
+    },
+    {
+      "id": 9,
+      "name": "CENTRO EDUCACIONAL ARTE DO SABER",
+      "phone": "(31) 8248-5252",
+      "email": "",
+      "address": "",
+      "neighborhood": "",
+      "city": "",
+      "state": "MG",
+      "notes": "Unidade I - Das 8:30 às 17:30 - Rua Dom Viçoso\nUnidade II - Das 7:00 às 16:00 horas - Rua Dinamarca\n03x na semana Segunda, Quarta e Sexta",
+      "addresses": [
+        {
+          "id": 1,
+          "street": "RUA DINAMARCA, 138",
+          "neighborhood": "FONTE DA SAUDADE",
+          "city": "MARIANA-MG",
+          "state": "MG",
+          "reference": "",
+          "daysOfWeek": [
+            "Segunda",
+            "Quarta",
+            "Sexta"
+          ]
+        },
+        {
+          "id": 2,
+          "street": "RUA DOM VIÇOSO, 185",
+          "neighborhood": "CENTRO",
+          "city": "MARIANA-MG",
+          "state": "MG",
+          "reference": "",
+          "daysOfWeek": [
+            "Segunda",
+            "Quarta",
+            "Sexta"
+          ]
+        }
+      ],
+      "active": true,
+      "created_at": "2026-07-03T16:33:18.593Z",
+      "updated_at": "2026-07-06T22:44:16.301Z"
+    },
+    {
+      "id": 10,
+      "name": "HEXAGONO ENGENHARIA / Leandro",
+      "phone": "(31) 8957-1044",
+      "email": "",
+      "address": "",
+      "neighborhood": "",
+      "city": "",
+      "state": "MG",
+      "notes": "05 na semana Segunda a Sexta",
+      "addresses": [
+        {
+          "id": 1,
+          "street": "Rua Teófolo Otoni, 90",
+          "neighborhood": "Centro",
+          "city": "Mariana-MG",
+          "state": "MG",
+          "reference": "",
+          "daysOfWeek": [
+            "Segunda",
+            "Terça",
+            "Quarta",
+            "Quinta",
+            "Sexta"
+          ]
+        },
+        {
+          "id": 2,
+          "street": "Rua Sabará, 92",
+          "neighborhood": "Cabanas",
+          "city": "Mariana-MG",
+          "state": "MG",
+          "reference": "",
+          "daysOfWeek": []
+        },
+        {
+          "id": 3,
+          "street": "Rua Paraju, 226",
+          "neighborhood": "Rosario",
+          "city": "Mariana-MG",
+          "state": "MG",
+          "reference": "",
+          "daysOfWeek": []
+        },
+        {
+          "id": 4,
+          "street": "Rua Da Gloria, 149",
+          "neighborhood": "São Gonçalo",
+          "city": "Mariana-MG",
+          "state": "MG",
+          "reference": "",
+          "daysOfWeek": []
+        }
+      ],
+      "active": false,
+      "created_at": "2026-07-03T16:54:52.226Z",
+      "updated_at": "2026-07-06T23:32:02.907Z"
+    },
+    {
+      "id": 11,
+      "name": "TECLIT SERVICOS LTDA - Alice Adm",
+      "phone": "(31) 8419-8306",
+      "email": "",
+      "address": "",
+      "neighborhood": "",
+      "city": "",
+      "state": "MG",
+      "notes": "05x na semana Segunda a Sexta",
+      "addresses": [
+        {
+          "id": 1,
+          "street": "Rua Timbopeba, 147",
+          "neighborhood": "Antonio Pereira",
+          "city": "Ouro Preto-MG",
+          "state": "MG",
+          "reference": "",
+          "daysOfWeek": [
+            "Segunda",
+            "Terça",
+            "Quarta",
+            "Quinta",
+            "Sexta"
+          ]
+        }
+      ],
+      "active": true,
+      "created_at": "2026-07-03T17:22:45.005Z",
+      "updated_at": "2026-07-03T17:26:33.794Z"
+    },
+    {
+      "id": 12,
+      "name": "Progen Engenharia - Jarbas",
+      "phone": "(31) 9514-5105",
+      "email": "",
+      "address": "",
+      "neighborhood": "",
+      "city": "",
+      "state": "MG",
+      "notes": "05x na semana Segunda a Sexta | Meia Diária - Manha",
+      "addresses": [
+        {
+          "id": 1,
+          "street": "Rua Bom Jesus, 190",
+          "neighborhood": "Barro Preto",
+          "city": "Mariana-MG",
+          "state": "MG",
+          "reference": "",
+          "daysOfWeek": [
+            "Segunda",
+            "Terça",
+            "Quarta",
+            "Quinta",
+            "Sexta"
+          ]
+        }
+      ],
+      "active": false,
+      "created_at": "2026-07-03T17:30:21.933Z",
+      "updated_at": "2026-07-06T23:32:39.161Z"
+    },
+    {
+      "id": 13,
+      "name": "PLAMHAG - Livia Almeida GAVAZZA FILHO",
+      "phone": "38 9 9945-0177",
+      "email": "",
+      "address": "Rua Avenida Jusceline Kubistscheck, 677",
+      "neighborhood": "Bauxita",
+      "city": "Ouro Preto",
+      "state": "MG",
+      "notes": "Meia Diária - Terça e Sexta",
+      "addresses": [],
+      "active": false,
+      "created_at": "2026-07-06T22:56:51.878Z",
+      "updated_at": "2026-07-06T23:38:51.596Z"
+    },
+    {
+      "id": 14,
+      "name": "PLAMHAG - Livia Almeida GAVAZZA FILHO",
+      "phone": "31 98676-8035",
+      "email": "",
+      "address": "",
+      "neighborhood": "",
+      "city": "",
+      "state": "MG",
+      "notes": "Meia Diária - Terça e Sexta",
+      "addresses": [
+        {
+          "id": 1,
+          "street": "Rua Avenida Jusceline Kubistscheck,677",
+          "neighborhood": "Bauxita",
+          "city": "Ouro Preto-MG",
+          "state": "MG",
+          "reference": "",
+          "daysOfWeek": []
+        }
+      ],
+      "active": true,
+      "created_at": "2026-07-06T23:37:50.223Z",
+      "updated_at": "2026-07-07T00:38:00.747Z"
+    },
+    {
+      "id": 15,
+      "name": "GUAICUY",
+      "phone": "31 97159-7272",
+      "email": "",
+      "address": "",
+      "neighborhood": "",
+      "city": "",
+      "state": "MG",
+      "notes": "",
+      "addresses": [],
+      "active": true,
+      "created_at": "2026-07-06T23:42:13.477Z",
+      "updated_at": "2026-07-06T23:42:13.477Z"
+    }
+  ],
+  "employees": [
+    {
+      "id": 1,
+      "name": "Arlinda da Silva",
+      "phone": "(31) 8409-5244",
+      "email": "",
+      "role": "auxiliar",
+      "active": true,
+      "created_at": "2026-07-02T23:56:20.537Z",
+      "updated_at": "2026-07-02T23:56:20.537Z"
+    },
+    {
+      "id": 2,
+      "name": "Dione Geraldo Alexandre",
+      "phone": "(31) 9954-5727",
+      "email": "",
+      "role": "auxiliar",
+      "active": true,
+      "created_at": "2026-07-02T23:57:46.988Z",
+      "updated_at": "2026-07-02T23:57:46.988Z"
+    },
+    {
+      "id": 3,
+      "name": "Giselle Almeida",
+      "phone": "(31) 8372-7270",
+      "email": "",
+      "role": "auxiliar",
+      "active": true,
+      "created_at": "2026-07-02T23:58:58.699Z",
+      "updated_at": "2026-07-02T23:58:58.699Z"
+    },
+    {
+      "id": 4,
+      "name": "Julia de Jesus Carneiro",
+      "phone": "(31) 9861-0976",
+      "email": "",
+      "role": "auxiliar",
+      "active": true,
+      "created_at": "2026-07-02T23:59:56.877Z",
+      "updated_at": "2026-07-02T23:59:56.877Z"
+    },
+    {
+      "id": 5,
+      "name": "Maria do Carmo de Sena",
+      "phone": "(31) 8117-4399",
+      "email": "",
+      "role": "auxiliar",
+      "active": true,
+      "created_at": "2026-07-03T00:00:50.314Z",
+      "updated_at": "2026-07-03T00:00:50.314Z"
+    },
+    {
+      "id": 6,
+      "name": "Maria Pio Francisca",
+      "phone": "(31) 7159-6068",
+      "email": "",
+      "role": "auxiliar",
+      "active": true,
+      "created_at": "2026-07-03T00:01:55.964Z",
+      "updated_at": "2026-07-03T00:01:55.964Z"
+    },
+    {
+      "id": 7,
+      "name": "Sabrina Rosária de Freitas",
+      "phone": "(31) 8426-5895",
+      "email": "",
+      "role": "auxiliar",
+      "active": true,
+      "created_at": "2026-07-03T00:03:17.138Z",
+      "updated_at": "2026-07-03T00:03:17.138Z"
+    },
+    {
+      "id": 8,
+      "name": "Samila",
+      "phone": "(31) 9689-3239",
+      "email": "",
+      "role": "auxiliar",
+      "active": true,
+      "created_at": "2026-07-03T00:04:25.530Z",
+      "updated_at": "2026-07-03T00:04:25.530Z"
+    },
+    {
+      "id": 9,
+      "name": "Thamires Jordana",
+      "phone": "(31) 8430-3773",
+      "email": "",
+      "role": "auxiliar",
+      "active": true,
+      "created_at": "2026-07-03T00:05:41.922Z",
+      "updated_at": "2026-07-03T00:05:41.922Z"
+    }
+  ],
+  "schedules": [
+    {
+      "id": 4,
+      "client_id": 1,
+      "employee_ids": [
+        3
+      ],
+      "date": "2026-07-15",
+      "start_time": "07:00",
+      "end_time": "17:00",
+      "service": "Limpeza de Apartamento",
+      "address": "",
+      "notes": "",
+      "status": "pendente",
+      "created_by": 1,
+      "created_at": "2026-07-05T15:16:33.399Z",
+      "recurring_template_id": 2
+    },
+    {
+      "id": 5,
+      "client_id": 1,
+      "employee_ids": [
+        3
+      ],
+      "date": "2026-07-18",
+      "start_time": "07:00",
+      "end_time": "17:00",
+      "service": "Limpeza de Apartamento",
+      "address": "",
+      "notes": "",
+      "status": "pendente",
+      "created_by": 1,
+      "created_at": "2026-07-05T15:16:33.400Z",
+      "recurring_template_id": 2
+    },
+    {
+      "id": 6,
+      "client_id": 1,
+      "employee_ids": [
+        3
+      ],
+      "date": "2026-07-22",
+      "start_time": "07:00",
+      "end_time": "17:00",
+      "service": "Limpeza de Apartamento",
+      "address": "",
+      "notes": "",
+      "status": "pendente",
+      "created_by": 1,
+      "created_at": "2026-07-05T15:16:33.401Z",
+      "recurring_template_id": 2
+    },
+    {
+      "id": 7,
+      "client_id": 1,
+      "employee_ids": [
+        3
+      ],
+      "date": "2026-07-25",
+      "start_time": "07:00",
+      "end_time": "17:00",
+      "service": "Limpeza de Apartamento",
+      "address": "",
+      "notes": "",
+      "status": "pendente",
+      "created_by": 1,
+      "created_at": "2026-07-05T15:16:33.402Z",
+      "recurring_template_id": 2
+    },
+    {
+      "id": 8,
+      "client_id": 1,
+      "employee_ids": [
+        3
+      ],
+      "date": "2026-07-29",
+      "start_time": "07:00",
+      "end_time": "17:00",
+      "service": "Limpeza de Apartamento",
+      "address": "",
+      "notes": "",
+      "status": "pendente",
+      "created_by": 1,
+      "created_at": "2026-07-05T15:16:33.404Z",
+      "recurring_template_id": 2
+    },
+    {
+      "id": 13,
+      "client_id": 7,
+      "employee_ids": [
+        3
+      ],
+      "date": "2026-07-22",
+      "start_time": "07:00",
+      "end_time": "17:00",
+      "service": "Limpeza Comercial",
+      "address": "Rua Direita, 19 - Centro - Mariana-MG",
+      "notes": "",
+      "status": "pendente",
+      "created_by": 1,
+      "created_at": "2026-07-06T21:49:41.135Z",
+      "recurring_template_id": 3
+    }
+  ],
+  "recurringTemplates": [
+    {
+      "id": 1,
+      "client_id": 7,
+      "employee_ids": [
+        7
+      ],
+      "start_date": "2026-07-06",
+      "end_date": "2026-07-31",
+      "frequency": "mensal",
+      "days_of_week": [
+        "Seg",
+        "Qua",
+        "Sex"
+      ],
+      "start_time": "07:00",
+      "end_time": "17:00",
+      "service": "Limpeza Comercial",
+      "address": "",
+      "notes": "",
+      "active": true,
+      "created_by": 1,
+      "created_at": "2026-07-05T15:11:34.208Z"
+    },
+    {
+      "id": 2,
+      "client_id": 1,
+      "employee_ids": [
+        3
+      ],
+      "start_date": "2026-07-07",
+      "end_date": "2026-07-31",
+      "frequency": "semanal",
+      "days_of_week": [
+        "Ter",
+        "Sex"
+      ],
+      "start_time": "07:00",
+      "end_time": "17:00",
+      "service": "Limpeza de Apartamento",
+      "address": "",
+      "notes": "",
+      "active": true,
+      "created_by": 1,
+      "created_at": "2026-07-05T15:16:33.394Z"
+    },
+    {
+      "id": 3,
+      "client_id": 7,
+      "employee_ids": [
+        3
+      ],
+      "start_date": "2026-07-08",
+      "end_date": "2026-07-23",
+      "frequency": "quinzenal",
+      "days_of_week": [
+        "Qua"
+      ],
+      "start_time": "07:00",
+      "end_time": "17:00",
+      "service": "Limpeza Comercial",
+      "address": "Rua Direita, 19 - Centro - Mariana-MG",
+      "notes": "",
+      "active": true,
+      "created_by": 1,
+      "created_at": "2026-07-06T21:49:41.131Z"
+    }
+  ],
+  "history": [
+    {
+      "id": 35,
+      "user_id": 1,
+      "action": "login",
+      "old_value": "",
+      "new_value": "Login realizado",
+      "timestamp": "2026-07-07T00:01:46.963Z"
+    },
+    {
+      "id": 34,
+      "user_id": 1,
+      "action": "criou_cliente",
+      "old_value": "",
+      "new_value": "Cliente: GUAICUY",
+      "timestamp": "2026-07-06T23:42:13.477Z"
+    },
+    {
+      "id": 33,
+      "user_id": 1,
+      "action": "desativou_cliente",
+      "old_value": "PLAMHAG - Livia Almeida GAVAZZA FILHO",
+      "new_value": "Cliente desativado",
+      "timestamp": "2026-07-06T23:38:51.596Z"
+    },
+    {
+      "id": 32,
+      "user_id": 1,
+      "action": "criou_cliente",
+      "old_value": "",
+      "new_value": "Cliente: PLAMHAG - Livia Almeida GAVAZZA FILHO",
+      "timestamp": "2026-07-06T23:37:50.223Z"
+    },
+    {
+      "id": 31,
+      "user_id": 1,
+      "action": "desativou_cliente",
+      "old_value": "PLAMHAG - Livia Almeida GAVAZZA FILHO",
+      "new_value": "Cliente desativado",
+      "timestamp": "2026-07-06T23:34:54.623Z"
+    },
+    {
+      "id": 30,
+      "user_id": 1,
+      "action": "atualizou_cliente",
+      "old_value": "",
+      "new_value": "Cliente: PLAMHAG - Livia Almeida GAVAZZA FILHO",
+      "timestamp": "2026-07-06T23:33:31.396Z"
+    },
+    {
+      "id": 29,
+      "user_id": 1,
+      "action": "desativou_cliente",
+      "old_value": "Progen Engenharia - Jarbas",
+      "new_value": "Cliente desativado",
+      "timestamp": "2026-07-06T23:32:39.161Z"
+    },
+    {
+      "id": 28,
+      "user_id": 1,
+      "action": "desativou_cliente",
+      "old_value": "HEXAGONO ENGENHARIA / Leandro",
+      "new_value": "Cliente desativado",
+      "timestamp": "2026-07-06T23:32:02.907Z"
+    },
+    {
+      "id": 27,
+      "user_id": 1,
+      "action": "desativou_cliente",
+      "old_value": "HEXAGONO ENGENHARIA / Leandro",
+      "new_value": "Cliente desativado",
+      "timestamp": "2026-07-06T23:31:41.018Z"
+    },
+    {
+      "id": 26,
+      "user_id": 1,
+      "action": "atualizou_cliente",
+      "old_value": "",
+      "new_value": "Cliente: PLAMHAG - Livia Almeida GAVAZZA FILHO",
+      "timestamp": "2026-07-06T23:21:17.091Z"
+    },
+    {
+      "id": 25,
+      "user_id": 1,
+      "action": "desativou_cliente",
+      "old_value": "HEXAGONO ENGENHARIA / Leandro",
+      "new_value": "Cliente desativado",
+      "timestamp": "2026-07-06T23:19:14.996Z"
+    },
+    {
+      "id": 24,
+      "user_id": 1,
+      "action": "atualizou_cliente",
+      "old_value": "",
+      "new_value": "Cliente: PLAMHAG - Livia Almeida GAVAZZA FILHO",
+      "timestamp": "2026-07-06T22:58:03.682Z"
+    },
+    {
+      "id": 23,
+      "user_id": 1,
+      "action": "criou_cliente",
+      "old_value": "",
+      "new_value": "Cliente: PLAMHAG - Livia Almeida GAVAZZA FILHO",
+      "timestamp": "2026-07-06T22:56:51.878Z"
+    },
+    {
+      "id": 22,
+      "user_id": 1,
+      "action": "desativou_cliente",
+      "old_value": "Progen Engenharia - Jarbas",
+      "new_value": "Cliente desativado",
+      "timestamp": "2026-07-06T22:45:26.537Z"
+    },
+    {
+      "id": 21,
+      "user_id": 1,
+      "action": "atualizou_cliente",
+      "old_value": "",
+      "new_value": "Cliente: CENTRO EDUCACIONAL ARTE DO SABER",
+      "timestamp": "2026-07-06T22:44:16.301Z"
+    },
+    {
+      "id": 20,
+      "schedule_id": 14,
+      "user_id": 1,
+      "action": "removeu_agendamento",
+      "old_value": "2026-07-09 - 07:00 - Aposvale-Ana",
+      "new_value": "Agendamento excluído",
+      "timestamp": "2026-07-06T22:02:21.002Z"
+    },
+    {
+      "id": 19,
+      "schedule_id": 14,
+      "user_id": 1,
+      "action": "alterou_status",
+      "old_value": "pendente",
+      "new_value": "funcionario_faltou",
+      "timestamp": "2026-07-06T22:02:08.259Z"
+    },
+    {
+      "id": 18,
+      "schedule_id": 14,
+      "user_id": 1,
+      "action": "criou_agendamento",
+      "old_value": "",
+      "new_value": "2026-07-09 - 07:00 - Aposvale-Ana",
+      "timestamp": "2026-07-06T22:01:37.767Z"
+    },
+    {
+      "id": 17,
+      "schedule_id": 14,
+      "user_id": 1,
+      "action": "removeu_agendamento",
+      "old_value": "2026-07-08 - 07:00 - Condominio - Jordana Souza",
+      "new_value": "Agendamento excluído",
+      "timestamp": "2026-07-06T21:56:22.814Z"
+    },
+    {
+      "id": 16,
+      "schedule_id": 14,
+      "user_id": 1,
+      "action": "criou_agendamento",
+      "old_value": "",
+      "new_value": "2026-07-08 - 07:00 - Condominio - Jordana Souza",
+      "timestamp": "2026-07-06T21:55:48.325Z"
+    },
+    {
+      "id": 15,
+      "schedule_id": 12,
+      "user_id": 1,
+      "action": "removeu_agendamento",
+      "old_value": "2026-07-08 - 07:00 - Ellen Boemme",
+      "new_value": "Agendamento excluído",
+      "timestamp": "2026-07-06T21:55:02.699Z"
+    },
+    {
+      "id": 14,
+      "schedule_id": 12,
+      "user_id": 1,
+      "action": "alterou_status",
+      "old_value": "pendente",
+      "new_value": "cancelado_cliente",
+      "timestamp": "2026-07-06T21:54:51.118Z"
+    },
+    {
+      "id": 13,
+      "schedule_id": 10,
+      "user_id": 1,
+      "action": "removeu_agendamento",
+      "old_value": "2026-07-08 - 07:00 - Ellen Boemme",
+      "new_value": "Agendamento excluído",
+      "timestamp": "2026-07-06T21:54:21.108Z"
+    },
+    {
+      "id": 12,
+      "schedule_id": 11,
+      "user_id": 1,
+      "action": "removeu_agendamento",
+      "old_value": "2026-07-08 - 07:00 - Ellen Boemme",
+      "new_value": "Agendamento excluído",
+      "timestamp": "2026-07-06T21:53:51.842Z"
+    },
+    {
+      "id": 11,
+      "schedule_id": 9,
+      "user_id": 1,
+      "action": "removeu_agendamento",
+      "old_value": "2026-07-08 - 07:00 - Ellen Boemme",
+      "new_value": "Agendamento excluído",
+      "timestamp": "2026-07-06T21:53:43.509Z"
+    },
+    {
+      "id": 10,
+      "user_id": 1,
+      "action": "criou_recorrencia",
+      "old_value": "",
+      "new_value": "Ellen Boemme - quinzenal - 2 agendamentos",
+      "timestamp": "2026-07-06T21:49:41.136Z"
+    },
+    {
+      "id": 9,
+      "schedule_id": 11,
+      "user_id": 1,
+      "action": "criou_agendamento",
+      "old_value": "",
+      "new_value": "2026-07-08 - 07:00 - Ellen Boemme",
+      "timestamp": "2026-07-06T21:47:16.573Z"
+    },
+    {
+      "id": 8,
+      "schedule_id": 10,
+      "user_id": 1,
+      "action": "criou_agendamento",
+      "old_value": "",
+      "new_value": "2026-07-08 - 07:00 - Ellen Boemme",
+      "timestamp": "2026-07-06T21:47:03.269Z"
+    },
+    {
+      "id": 7,
+      "schedule_id": 9,
+      "user_id": 1,
+      "action": "criou_agendamento",
+      "old_value": "",
+      "new_value": "2026-07-08 - 07:00 - Ellen Boemme",
+      "timestamp": "2026-07-06T21:41:44.421Z"
+    },
+    {
+      "id": 6,
+      "user_id": 1,
+      "action": "login",
+      "old_value": "",
+      "new_value": "Login realizado",
+      "timestamp": "2026-07-06T21:40:05.876Z"
+    },
+    {
+      "id": 5,
+      "schedule_id": 3,
+      "user_id": 1,
+      "action": "removeu_agendamento",
+      "old_value": "2026-07-11 - 07:00",
+      "new_value": "",
+      "timestamp": "2026-07-05T15:33:29.400Z"
+    },
+    {
+      "id": 4,
+      "schedule_id": 1,
+      "user_id": 1,
+      "action": "removeu_agendamento",
+      "old_value": "2026-07-05 - 07:00",
+      "new_value": "",
+      "timestamp": "2026-07-05T15:33:05.212Z"
+    },
+    {
+      "id": 3,
+      "schedule_id": 2,
+      "user_id": 1,
+      "action": "removeu_agendamento",
+      "old_value": "2026-07-08 - 07:00",
+      "new_value": "",
+      "timestamp": "2026-07-05T15:32:36.999Z"
+    },
+    {
+      "id": 2,
+      "user_id": 1,
+      "action": "criou_recorrencia",
+      "old_value": "",
+      "new_value": "3T Construções - Andreza / Leidiane - semanal - 7 agendamentos",
+      "timestamp": "2026-07-05T15:16:33.407Z"
+    },
+    {
+      "id": 1,
+      "user_id": 1,
+      "action": "criou_recorrencia",
+      "old_value": "",
+      "new_value": "Ellen Boemme - mensal - 1 agendamentos",
+      "timestamp": "2026-07-05T15:11:34.211Z"
+    },
+    {
+      "id": 36,
+      "user_id": 1,
+      "action": "login",
+      "old_value": "",
+      "new_value": "Login realizado",
+      "timestamp": "2026-07-08T10:53:21.726Z"
+    },
+    {
+      "id": 37,
+      "user_id": 1,
+      "action": "login",
+      "old_value": "",
+      "new_value": "Login realizado",
+      "timestamp": "2026-07-09T11:13:48.949Z"
+    }
+  ],
+  "confirmations": []
+}
