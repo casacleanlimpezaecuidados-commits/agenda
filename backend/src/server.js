@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const { initializeDatabase } = require('./config/database');
+const { initializeDatabase, connectDatabase } = require('./config/database');
 const { startAutoCloseCron } = require('./config/cron');
 
 // Import Routes

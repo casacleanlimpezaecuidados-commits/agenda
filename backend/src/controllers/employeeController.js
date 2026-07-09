@@ -1,176 +1,106 @@
-const { database } = require('../config/database');
+const { Employee, Schedule, History } = require('../config/database');
 
 const employeeController = {
   async list(req, res) {
     try {
       const { search, active, role } = req.query;
-      let employees = await database.findAll('employees');
+      let query = {};
 
-      // Filtro de busca
       if (search) {
-        const searchLower = search.toLowerCase();
-        employees = employees.filter(emp => 
-          emp.name.toLowerCase().includes(searchLower) ||
-          emp.phone.includes(search) ||
-          (emp.email && emp.email.toLowerCase().includes(searchLower))
-        );
+        query.$or = [
+          { name: { $regex: search, $options: 'i' } },
+          { phone: { $regex: search, $options: 'i' } }
+        ];
       }
 
-      // Filtro de ativos
-      if (active !== undefined) {
-        const isActive = active === 'true';
-        employees = employees.filter(emp => emp.active === isActive);
-      }
+      if (active !== undefined) query.active = active === 'true';
+      else query.active = true;
+      if (role) query.role = role;
 
-      // Filtro de cargo
-      if (role) {
-        employees = employees.filter(emp => emp.role === role);
-      }
+      let employees = await Employee.find(query).sort({ created_at: -1 });
 
-      // Adicionar contagem de agendamentos para cada funcionário
-      const data = await database.read();
-      employees = employees.map(emp => ({
-        ...emp,
-        total_schedules: data.schedules.filter(s => 
-          s.employee_ids && s.employee_ids.includes(emp.id)
-        ).length,
-        today_schedules: data.schedules.filter(s => 
-          s.employee_ids && 
-          s.employee_ids.includes(emp.id) && 
-          s.date === new Date().toISOString().split('T')[0]
-        ).length
+      // Adicionar contagem de agendamentos
+      const enriched = await Promise.all(employees.map(async (emp) => {
+        const totalSchedules = await Schedule.countDocuments({ employee_ids: emp._id });
+        const todaySchedules = await Schedule.countDocuments({
+          employee_ids: emp._id,
+          date: new Date().toISOString().split('T')[0]
+        });
+        return { ...emp.toObject(), total_schedules: totalSchedules, today_schedules: todaySchedules };
       }));
 
-      return res.json(employees);
+      return res.json(enriched);
     } catch (error) {
-      console.error('Erro ao listar funcionários:', error);
-      return res.status(500).json({ error: 'Erro interno do servidor' });
+      return res.status(500).json({ error: error.message });
     }
   },
 
   async create(req, res) {
     try {
-      const { name, phone, email, role } = req.body;
+      const { name, phone } = req.body;
+      if (!name || !phone) return res.status(400).json({ error: 'Nome e telefone obrigatórios' });
 
-      if (!name || !phone) {
-        return res.status(400).json({ error: 'Nome e telefone são obrigatórios' });
-      }
+      const employee = await Employee.create(req.body);
 
-      const employee = await database.insert('employees', {
-        name,
-        phone,
-        email: email || '',
-        role: role || 'auxiliar',
-        active: true,
-        created_at: new Date().toISOString()
-      });
-
-      // Registrar no histórico
-      const data = await database.read();
-      data.history.push({
-        id: data.history.length + 1,
+      await History.create({
         user_id: req.user.id,
         action: 'criou_funcionario',
-        old_value: '',
         new_value: `Funcionário: ${employee.name}`,
-        timestamp: new Date().toISOString()
+        timestamp: new Date()
       });
-      await database.write(data);
 
       return res.status(201).json(employee);
     } catch (error) {
-      console.error('Erro ao criar funcionário:', error);
-      return res.status(500).json({ error: 'Erro interno do servidor' });
+      return res.status(500).json({ error: error.message });
     }
   },
 
   async getById(req, res) {
     try {
-      const id = parseInt(req.params.id);
-      const employee = await database.findById('employees', id);
+      const employee = await Employee.findById(req.params.id);
+      if (!employee) return res.status(404).json({ error: 'Funcionário não encontrado' });
 
-      if (!employee) {
-        return res.status(404).json({ error: 'Funcionário não encontrado' });
-      }
-
-      // Adicionar agenda do funcionário
-      const data = await database.read();
-      const schedules = data.schedules.filter(s => 
-        s.employee_ids && s.employee_ids.includes(employee.id)
-      );
-
-      return res.json({
-        ...employee,
-        schedules: schedules.sort((a, b) => new Date(a.date) - new Date(b.date))
-      });
+      const schedules = await Schedule.find({ employee_ids: employee._id }).sort({ date: 1 });
+      return res.json({ ...employee.toObject(), schedules });
     } catch (error) {
-      console.error('Erro ao buscar funcionário:', error);
-      return res.status(500).json({ error: 'Erro interno do servidor' });
+      return res.status(500).json({ error: error.message });
     }
   },
 
   async update(req, res) {
     try {
-      const id = parseInt(req.params.id);
-      const updates = req.body;
-      
-      delete updates.id;
-      
-      const employee = await database.update('employees', id, updates);
-
-      if (!employee) {
-        return res.status(404).json({ error: 'Funcionário não encontrado' });
-      }
-
+      const employee = await Employee.findByIdAndUpdate(req.params.id, req.body, { new: true });
+      if (!employee) return res.status(404).json({ error: 'Funcionário não encontrado' });
       return res.json(employee);
     } catch (error) {
-      console.error('Erro ao atualizar funcionário:', error);
-      return res.status(500).json({ error: 'Erro interno do servidor' });
+      return res.status(500).json({ error: error.message });
     }
   },
 
   async remove(req, res) {
     try {
-      const id = parseInt(req.params.id);
-      const employee = await database.findById('employees', id);
-
-      if (!employee) {
-        return res.status(404).json({ error: 'Funcionário não encontrado' });
-      }
-
-      // Soft delete
-      await database.update('employees', id, { active: false });
-
-      return res.json({ message: 'Funcionário desativado com sucesso' });
+      await Employee.findByIdAndUpdate(req.params.id, { active: false });
+      return res.json({ message: 'Funcionário desativado' });
     } catch (error) {
-      console.error('Erro ao remover funcionário:', error);
-      return res.status(500).json({ error: 'Erro interno do servidor' });
+      return res.status(500).json({ error: error.message });
     }
   },
 
   async getSchedule(req, res) {
     try {
-      const id = parseInt(req.params.id);
       const { month, year } = req.query;
-      
-      const data = await database.read();
-      let schedules = data.schedules.filter(s => 
-        s.employee_ids && s.employee_ids.includes(id)
-      );
+      let query = { employee_ids: req.params.id };
 
-      // Filtrar por mês/ano se fornecidos
       if (month && year) {
-        schedules = schedules.filter(s => {
-          const scheduleDate = new Date(s.date);
-          return scheduleDate.getMonth() + 1 === parseInt(month) && 
-                 scheduleDate.getFullYear() === parseInt(year);
-        });
+        const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+        const endDate = `${year}-${String(month).padStart(2, '0')}-31`;
+        query.date = { $gte: startDate, $lte: endDate };
       }
 
-      return res.json(schedules.sort((a, b) => new Date(a.date) - new Date(b.date)));
+      const schedules = await Schedule.find(query).sort({ date: 1 });
+      return res.json(schedules);
     } catch (error) {
-      console.error('Erro ao buscar agenda do funcionário:', error);
-      return res.status(500).json({ error: 'Erro interno do servidor' });
+      return res.status(500).json({ error: error.message });
     }
   }
 };

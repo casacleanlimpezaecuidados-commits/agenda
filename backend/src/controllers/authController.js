@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const { database } = require('../config/database');
+const { User, History } = require('../config/database');
 const { generateToken } = require('../config/jwt');
 
 const authController = {
@@ -11,8 +11,7 @@ const authController = {
         return res.status(400).json({ error: 'Email e senha são obrigatórios' });
       }
 
-      const data = await database.read();
-      const user = data.users.find(u => u.email === email && u.active);
+      const user = await User.findOne({ email, active: true });
 
       if (!user) {
         return res.status(401).json({ error: 'Email ou senha inválidos' });
@@ -26,20 +25,16 @@ const authController = {
 
       const token = generateToken(user);
 
-      // Registrar login no histórico
-      data.history.push({
-        id: data.history.length + 1,
+      await History.create({
         user_id: user.id,
         action: 'login',
-        old_value: '',
         new_value: 'Login realizado',
-        timestamp: new Date().toISOString()
+        timestamp: new Date()
       });
-      await database.write(data);
 
       return res.json({
         user: {
-          id: user.id,
+          id: user._id,
           name: user.name,
           email: user.email,
           role: user.role
@@ -54,15 +49,14 @@ const authController = {
 
   async me(req, res) {
     try {
-      const data = await database.read();
-      const user = data.users.find(u => u.id === req.user.id);
+      const user = await User.findById(req.user.id);
 
       if (!user) {
         return res.status(404).json({ error: 'Usuário não encontrado' });
       }
 
       return res.json({
-        id: user.id,
+        id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
@@ -77,9 +71,7 @@ const authController = {
   async changePassword(req, res) {
     try {
       const { currentPassword, newPassword } = req.body;
-
-      const data = await database.read();
-      const user = data.users.find(u => u.id === req.user.id);
+      const user = await User.findById(req.user.id);
 
       if (!user) {
         return res.status(404).json({ error: 'Usuário não encontrado' });
@@ -93,8 +85,7 @@ const authController = {
 
       const hashedPassword = await bcrypt.hash(newPassword, 10);
       user.password = hashedPassword;
-
-      await database.write(data);
+      await user.save();
 
       return res.json({ message: 'Senha alterada com sucesso' });
     } catch (error) {

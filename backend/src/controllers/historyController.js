@@ -1,50 +1,31 @@
-const { database } = require('../config/database');
+const { History, User } = require('../config/database');
 
 const historyController = {
   async list(req, res) {
     try {
       const { user_id, action, start_date, end_date, limit } = req.query;
-      let history = await database.findAll('history');
+      let query = {};
 
-      // Filtro por usuário
-      if (user_id) {
-        history = history.filter(h => h.user_id === parseInt(user_id));
-      }
-
-      // Filtro por ação
-      if (action) {
-        history = history.filter(h => h.action.includes(action));
-      }
-
-      // Filtro por período
+      if (user_id) query.user_id = parseInt(user_id);
+      if (action) query.action = { $regex: action, $options: 'i' };
       if (start_date && end_date) {
-        history = history.filter(h => {
-          const histDate = new Date(h.timestamp).toISOString().split('T')[0];
-          return histDate >= start_date && histDate <= end_date;
-        });
+        query.timestamp = { $gte: new Date(start_date), $lte: new Date(end_date + 'T23:59:59') };
       }
 
-      // Enriquece com dados de usuário
-      const data = await database.read();
-      history = history.map(h => {
-        const user = data.users.find(u => u.id === h.user_id);
+      const history = await History.find(query).sort({ timestamp: -1 }).limit(parseInt(limit) || 200);
+
+      const enriched = await Promise.all(history.map(async (h) => {
+        const user = await User.findById(h.user_id);
         return {
-          ...h,
-          user_name: user ? user.name : 'Sistema'
+          ...h.toObject(),
+          user_name: user ? user.name : 'Sistema',
+          user_role: user ? user.role : 'sistema'
         };
-      });
+      }));
 
-      // Ordenar por data (mais recentes primeiro)
-      history.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-      // Limitar resultados
-      const limit_num = parseInt(limit) || 100;
-      history = history.slice(0, limit_num);
-
-      return res.json(history);
+      return res.json({ total: enriched.length, history: enriched });
     } catch (error) {
-      console.error('Erro ao buscar histórico:', error);
-      return res.status(500).json({ error: 'Erro interno do servidor' });
+      return res.status(500).json({ error: error.message });
     }
   }
 };

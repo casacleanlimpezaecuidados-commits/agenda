@@ -1,188 +1,145 @@
-const fs = require('fs').promises;
-const path = require('path');
+const mongoose = require('mongoose');
 
-const DB_PATH = path.join(__dirname, '../data/database.json');
-const SESSIONS_PATH = path.join(__dirname, '../data/sessions');
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://casacleanlimpezaecuidados_db_user:QXZxdOPjynmzsdUz@casa-clean.ofmuscx.mongodb.net/casa-clean?retryWrites=true&w=majority&appName=casa-clean';
 
-class Database {
-  constructor() {
-    this.data = null;
-  }
+let isConnected = false;
 
-  async initializeDatabase() {
-    try {
-      // Criar diretórios se não existirem
-      await fs.mkdir(path.dirname(DB_PATH), { recursive: true });
-      await fs.mkdir(SESSIONS_PATH, { recursive: true });
-
-      // Verificar se o arquivo existe
-      try {
-        await fs.access(DB_PATH);
-        const rawData = await fs.readFile(DB_PATH, 'utf8');
-        this.data = JSON.parse(rawData);
-      } catch {
-        // Criar arquivo com estrutura inicial
-        this.data = this.getInitialData();
-        await this.save();
-      }
-
-      return true;
-    } catch (error) {
-      console.error('Erro ao inicializar banco de dados:', error);
-      throw error;
-    }
-  }
-
-  getInitialData() {
-    return {
-      users: [
-        {
-          id: 1,
-          name: "Administrador",
-          email: "admin@casaclean.com",
-          password: "$2a$10$XQxBj0gYK5VGhHzVzqJ8qOzM7Z5G7vLqY5n5GqK5qQ5vLqY5n5GqK", // admin123
-          role: "admin",
-          active: true,
-          created_at: new Date().toISOString()
-        }
-      ],
-      clients: [
-        {
-          id: 1,
-          name: "Empresa Exemplo Ltda",
-          phone: "11999999999",
-          email: "contato@exemplo.com",
-          address: "Rua Principal, 100",
-          neighborhood: "Centro",
-          city: "São Paulo",
-          state: "SP",
-          notes: "Cliente teste",
-          addresses: [
-            {
-              id: 1,
-              street: "Rua Principal, 100",
-              neighborhood: "Centro",
-              city: "São Paulo",
-              state: "SP",
-              reference: "Próximo ao metrô",
-              daysOfWeek: ["Segunda", "Quarta", "Sexta"]
-            }
-          ],
-          active: true,
-          created_at: new Date().toISOString()
-        }
-      ],
-      employees: [
-        {
-          id: 1,
-          name: "Maria Silva",
-          phone: "11988888888",
-          email: "maria@casaclean.com",
-          role: "auxiliar",
-          active: true,
-          created_at: new Date().toISOString()
-        },
-        {
-          id: 2,
-          name: "João Santos",
-          phone: "11977777777",
-          email: "joao@casaclean.com",
-          role: "supervisor",
-          active: true,
-          created_at: new Date().toISOString()
-        }
-      ],
-      schedules: [
-        {
-          id: 1,
-          client_id: 1,
-          employee_ids: [1, 2],
-          date: new Date().toISOString().split('T')[0],
-          start_time: "07:00",
-          end_time: "17:00",
-          service: "Limpeza Comercial",
-          address: "Rua Principal, 100 - Centro - SP",
-          notes: "Limpeza completa do escritório",
-          status: "pendente",
-          created_by: 1,
-          created_at: new Date().toISOString()
-        }
-      ],
-      recurringTemplates: [],
-      history: [],
-      confirmations: []
-    };
-  }
-
-  async read() {
-    if (!this.data) {
-      await this.initializeDatabase();
-    }
-    return this.data;
-  }
-
-  async write(data) {
-    this.data = data;
-    await this.save();
-  }
-
-  async save() {
-    try {
-      await fs.writeFile(DB_PATH, JSON.stringify(this.data, null, 2), 'utf8');
-    } catch (error) {
-      console.error('Erro ao salvar banco de dados:', error);
-      throw error;
-    }
-  }
-
-  // Métodos auxiliares para CRUD
-  async findAll(collection) {
-    const data = await this.read();
-    return data[collection] || [];
-  }
-
-  async findById(collection, id) {
-    const data = await this.read();
-    return data[collection]?.find(item => item.id === id) || null;
-  }
-
-  async insert(collection, item) {
-    const data = await this.read();
-    const items = data[collection] || [];
-    const newId = items.length > 0 ? Math.max(...items.map(i => i.id)) + 1 : 1;
-    const newItem = { id: newId, ...item };
-    items.push(newItem);
-    await this.write(data);
-    return newItem;
-  }
-
-  async update(collection, id, updates) {
-    const data = await this.read();
-    const index = data[collection]?.findIndex(item => item.id === id);
-    if (index === -1) return null;
-    
-    data[collection][index] = { ...data[collection][index], ...updates, id };
-    await this.write(data);
-    return data[collection][index];
-  }
-
-  async delete(collection, id) {
-    const data = await this.read();
-    const index = data[collection]?.findIndex(item => item.id === id);
-    if (index === -1) return false;
-    
-    data[collection].splice(index, 1);
-    await this.write(data);
-    return true;
-  }
-
-  async query(collection, predicate) {
-    const data = await this.read();
-    return (data[collection] || []).filter(predicate);
+async function connectDatabase() {
+  if (isConnected) return;
+  
+  try {
+    await mongoose.connect(MONGODB_URI);
+    isConnected = true;
+    console.log('✅ MongoDB conectado com sucesso');
+  } catch (error) {
+    console.error('❌ Erro ao conectar MongoDB:', error.message);
+    throw error;
   }
 }
 
-// Singleton
-const database = new Database();
+// Schemas
+const userSchema = new mongoose.Schema({
+  name: String,
+  email: { type: String, unique: true },
+  password: String,
+  role: { type: String, default: 'auxiliar' },
+  active: { type: Boolean, default: true },
+  created_at: { type: Date, default: Date.now }
+});
 
-module.exports = { database, initializeDatabase: () => database.initializeDatabase() };
+const addressSchema = new mongoose.Schema({
+  street: String,
+  neighborhood: String,
+  city: String,
+  state: { type: String, default: 'MG' },
+  reference: String,
+  daysOfWeek: [String]
+});
+
+const clientSchema = new mongoose.Schema({
+  name: String,
+  phone: String,
+  email: String,
+  address: String,
+  neighborhood: String,
+  city: String,
+  state: { type: String, default: 'MG' },
+  notes: String,
+  addresses: [addressSchema],
+  active: { type: Boolean, default: true },
+  created_at: { type: Date, default: Date.now },
+  updated_at: { type: Date, default: Date.now }
+});
+
+const employeeSchema = new mongoose.Schema({
+  name: String,
+  phone: String,
+  email: String,
+  role: { type: String, default: 'auxiliar' },
+  active: { type: Boolean, default: true },
+  created_at: { type: Date, default: Date.now },
+  updated_at: { type: Date, default: Date.now }
+});
+
+const scheduleSchema = new mongoose.Schema({
+  client_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Client' },
+  employee_ids: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Employee' }],
+  date: String,
+  start_time: String,
+  end_time: String,
+  service: String,
+  address: String,
+  notes: String,
+  status: { type: String, default: 'pendente' },
+  created_by: Number,
+  created_at: { type: Date, default: Date.now },
+  updated_at: { type: Date, default: Date.now },
+  recurring_template_id: mongoose.Schema.Types.ObjectId
+});
+
+const historySchema = new mongoose.Schema({
+  schedule_id: mongoose.Schema.Types.ObjectId,
+  user_id: Number,
+  action: String,
+  old_value: String,
+  new_value: String,
+  timestamp: { type: Date, default: Date.now }
+});
+
+const confirmationSchema = new mongoose.Schema({
+  schedule_id: mongoose.Schema.Types.ObjectId,
+  employee_id: Number,
+  status: String,
+  confirmed_at: { type: Date, default: Date.now },
+  notes: String
+});
+
+// Models
+const User = mongoose.models.User || mongoose.model('User', userSchema);
+const Client = mongoose.models.Client || mongoose.model('Client', clientSchema);
+const Employee = mongoose.models.Employee || mongoose.model('Employee', employeeSchema);
+const Schedule = mongoose.models.Schedule || mongoose.model('Schedule', scheduleSchema);
+const History = mongoose.models.History || mongoose.model('History', historySchema);
+const Confirmation = mongoose.models.Confirmation || mongoose.model('Confirmation', confirmationSchema);
+
+// Função para inicializar dados padrão
+async function initializeDatabase() {
+  try {
+    await connectDatabase();
+    
+    // Verificar se já existe admin
+    const adminExists = await User.findOne({ email: 'admin@casaclean.com' });
+    
+    if (!adminExists) {
+      const bcrypt = require('bcryptjs');
+      const hashedPassword = await bcrypt.hash('admin123', 10);
+      
+      await User.create({
+        name: 'Administrador',
+        email: 'admin@casaclean.com',
+        password: hashedPassword,
+        role: 'admin',
+        active: true
+      });
+      
+      console.log('✅ Usuário admin criado');
+    }
+    
+    console.log('✅ Banco de dados inicializado');
+    return true;
+  } catch (error) {
+    console.error('❌ Erro ao inicializar banco:', error);
+    throw error;
+  }
+}
+
+module.exports = {
+  connectDatabase,
+  initializeDatabase,
+  User,
+  Client,
+  Employee,
+  Schedule,
+  History,
+  Confirmation
+};
