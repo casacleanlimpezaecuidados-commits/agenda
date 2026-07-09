@@ -6,7 +6,6 @@ let isConnected = false;
 
 async function connectDatabase() {
   if (isConnected) return;
-  
   try {
     await mongoose.connect(MONGODB_URI);
     isConnected = true;
@@ -17,7 +16,6 @@ async function connectDatabase() {
   }
 }
 
-// Schemas
 const userSchema = new mongoose.Schema({
   name: String,
   email: { type: String, unique: true },
@@ -71,7 +69,7 @@ const scheduleSchema = new mongoose.Schema({
   address: String,
   notes: String,
   status: { type: String, default: 'pendente' },
-  created_by: Number,
+  created_by: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
   recurring_template_id: mongoose.Schema.Types.ObjectId
@@ -79,7 +77,7 @@ const scheduleSchema = new mongoose.Schema({
 
 const historySchema = new mongoose.Schema({
   schedule_id: mongoose.Schema.Types.ObjectId,
-  user_id: Number,
+  user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   action: String,
   old_value: String,
   new_value: String,
@@ -88,13 +86,12 @@ const historySchema = new mongoose.Schema({
 
 const confirmationSchema = new mongoose.Schema({
   schedule_id: mongoose.Schema.Types.ObjectId,
-  employee_id: Number,
+  employee_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee' },
   status: String,
   confirmed_at: { type: Date, default: Date.now },
   notes: String
 });
 
-// Models
 const User = mongoose.models.User || mongoose.model('User', userSchema);
 const Client = mongoose.models.Client || mongoose.model('Client', clientSchema);
 const Employee = mongoose.models.Employee || mongoose.model('Employee', employeeSchema);
@@ -102,17 +99,13 @@ const Schedule = mongoose.models.Schedule || mongoose.model('Schedule', schedule
 const History = mongoose.models.History || mongoose.model('History', historySchema);
 const Confirmation = mongoose.models.Confirmation || mongoose.model('Confirmation', confirmationSchema);
 
-// Função para inicializar dados padrão
 async function initializeDatabase() {
   try {
     await connectDatabase();
-    
     const adminExists = await User.findOne({ email: 'admin@casaclean.com' });
-    
     if (!adminExists) {
       const bcrypt = require('bcryptjs');
       const hashedPassword = await bcrypt.hash('admin123', 10);
-      
       await User.create({
         name: 'Administrador',
         email: 'admin@casaclean.com',
@@ -120,10 +113,8 @@ async function initializeDatabase() {
         role: 'admin',
         active: true
       });
-      
       console.log('✅ Usuário admin criado');
     }
-    
     console.log('✅ Banco de dados inicializado');
     return true;
   } catch (error) {
@@ -133,12 +124,6 @@ async function initializeDatabase() {
 }
 
 module.exports = {
-  connectDatabase,
-  initializeDatabase,
-  User,
-  Client,
-  Employee,
-  Schedule,
-  History,
-  Confirmation
+  connectDatabase, initializeDatabase,
+  User, Client, Employee, Schedule, History, Confirmation
 };
