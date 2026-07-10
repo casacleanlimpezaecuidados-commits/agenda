@@ -4,6 +4,8 @@ const cors = require('cors');
 const path = require('path');
 const { initializeDatabase, connectDatabase } = require('./config/database');
 const { startAutoCloseCron } = require('./config/cron');
+const userRoutes = require('./routes/userRoutes');
+app.use('/api/users', userRoutes);
 
 // Import Routes
 const authRoutes = require('./routes/authRoutes');

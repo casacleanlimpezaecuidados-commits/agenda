@@ -12,7 +12,8 @@ import {
   Sparkles,
   ChevronLeft,
   Building2,
-  Menu
+  Menu,
+  Shield,
 } from 'lucide-react';
 
 const menuItems = [
@@ -64,6 +65,17 @@ const menuItems = [
         icon: BarChart3, 
         label: 'Relatórios',
         roles: ['admin', 'supervisor']
+      },
+    ]
+  },
+  {
+    title: 'Sistema',
+    items: [
+      { 
+        path: '/users', 
+        icon: Users, 
+        label: 'Usuários',
+        roles: ['admin']
       },
     ]
   },
@@ -157,12 +169,8 @@ export default function Sidebar({ onClose }) {
               {user?.name?.charAt(0) || 'U'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-white truncate">
-                {user?.name}
-              </p>
-              <p className="text-[10px] text-gray-400 capitalize">
-                {user?.role}
-              </p>
+              <p className="text-xs font-medium text-white truncate">{user?.name}</p>
+              <p className="text-[10px] text-gray-400 capitalize">{user?.role}</p>
             </div>
           </div>
           <button

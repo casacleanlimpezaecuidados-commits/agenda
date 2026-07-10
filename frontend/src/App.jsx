@@ -1,10 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-
-// Layouts
 import Layout from './components/Layout/Layout';
-
-// Pages
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Schedule from './pages/Schedule';
@@ -12,6 +8,7 @@ import Clients from './pages/Clients';
 import Employees from './pages/Employees';
 import History from './pages/History';
 import Reports from './pages/Reports';
+import Users from './pages/Users';
 
 function PrivateRoute({ children, roles }) {
   const { isAuthenticated, hasRole, loading } = useAuth();
@@ -64,6 +61,11 @@ function App() {
             <Route path="reports" element={
               <PrivateRoute roles={['admin', 'supervisor']}>
                 <Reports />
+              </PrivateRoute>
+            } />
+            <Route path="users" element={
+              <PrivateRoute roles={['admin']}>
+                <Users />
               </PrivateRoute>
             } />
           </Route>
