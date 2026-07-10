@@ -13,8 +13,8 @@ import {
 } from 'lucide-react';
 
 export default function Login() {
-  const [email, setEmail] = useState('admin@casaclean.com');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -31,7 +31,7 @@ export default function Login() {
       await login(email, password);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.error || 'Erro ao fazer login');
+      setError(err.response?.data?.error || 'Email ou senha inválidos');
     } finally {
       setLoading(false);
     }
@@ -66,7 +66,7 @@ export default function Login() {
           <div className="grid grid-cols-3 gap-6 max-w-md mx-auto">
             <div className="text-center p-4 rounded-2xl bg-white/5 backdrop-blur-sm">
               <Building2 className="w-6 h-6 text-light mx-auto mb-2" />
-              <p className="text-xs text-gray-400">12 Clientes</p>
+              <p className="text-xs text-gray-400">Clientes</p>
             </div>
             <div className="text-center p-4 rounded-2xl bg-white/5 backdrop-blur-sm">
               <Shield className="w-6 h-6 text-light mx-auto mb-2" />
@@ -161,12 +161,6 @@ export default function Login() {
                 )}
               </button>
             </form>
-
-            <div className="mt-6 p-4 bg-gray-50 rounded-xl">
-              <p className="text-xs text-gray-500 text-center">
-                <span className="font-medium">Login padrão:</span> admin@casaclean.com / admin123
-              </p>
-            </div>
           </div>
         </div>
       </div>
