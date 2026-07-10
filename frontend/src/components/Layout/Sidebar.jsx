@@ -46,7 +46,7 @@ const menuItems = [
         path: '/employees', 
         icon: UserCheck, 
         label: 'Funcionários',
-        roles: ['admin']
+        roles: ['admin', 'supervisor']
       },
     ]
   },

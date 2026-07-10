@@ -56,12 +56,16 @@ function App() {
               </PrivateRoute>
             } />
             <Route path="employees" element={
-              <PrivateRoute roles={['admin']}>
+              <PrivateRoute roles={['admin', 'supervisor']}>
                 <Employees />
               </PrivateRoute>
             } />
             <Route path="history" element={<History />} />
-            <Route path="reports" element={<Reports />} />
+            <Route path="reports" element={
+              <PrivateRoute roles={['admin', 'supervisor']}>
+                <Reports />
+              </PrivateRoute>
+            } />
           </Route>
         </Routes>
       </BrowserRouter>
