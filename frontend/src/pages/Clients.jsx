@@ -133,7 +133,7 @@ export default function Clients() {
     try {
       if (editingClient) {
         // Atualizar cliente existente
-        await api.put(`/clients/${editingClient.id}`, form);
+        await api.put(`/clients/${editingClient._id}`, form);
         showNotification('✅ Cliente atualizado com sucesso!');
       } else {
         // 1. Criar o cliente primeiro
@@ -144,7 +144,7 @@ export default function Clients() {
         };
 
         const clientResponse = await api.post('/clients', clientData);
-        const newClientId = clientResponse.data.id;
+        const newClientId = clientResponse.data._id;
 
         // 2. Adicionar os endereços um por um
         if (formAddresses.length > 0) {
@@ -196,7 +196,7 @@ export default function Clients() {
   const handleDelete = async (client) => {
     if (confirm(`Desativar cliente "${client.name}"?`)) {
       try {
-        await api.delete(`/clients/${client.id}`);
+        await api.delete(`/clients/${client._id}`);
         loadClients();
         setSelectedClient(null);
         showNotification('✅ Cliente desativado!');
@@ -222,7 +222,7 @@ export default function Clients() {
   // ========== ADICIONAR ENDEREÇO A CLIENTE EXISTENTE ==========
   const openAddressModal = async (client) => {
     try {
-      const response = await api.get(`/clients/${client.id}`);
+      const response = await api.get(`/clients/${client._id}`);
       setSelectedClient(response.data);
       setNewAddress({ street: '', neighborhood: '', city: '', reference: '', daysOfWeek: [] });
       setShowAddressModal(true);
@@ -238,8 +238,8 @@ export default function Clients() {
     }
     setSaving(true);
     try {
-      await api.post(`/clients/${selectedClient.id}/addresses`, newAddress);
-      const response = await api.get(`/clients/${selectedClient.id}`);
+      await api.post(`/clients/${selectedClient._id}/addresses`, newAddress);
+      const response = await api.get(`/clients/${selectedClient._id}`);
       setSelectedClient(response.data);
       setNewAddress({ street: '', neighborhood: '', city: '', reference: '', daysOfWeek: [] });
       loadClients();
@@ -254,8 +254,8 @@ export default function Clients() {
   const removeAddressFromExisting = async (addressId) => {
     if (confirm('Remover endereço?')) {
       try {
-        await api.delete(`/clients/${selectedClient.id}/addresses/${addressId}`);
-        const response = await api.get(`/clients/${selectedClient.id}`);
+        await api.delete(`/clients/${selectedClient._id}/addresses/${addressId}`);
+        const response = await api.get(`/clients/${selectedClient._id}`);
         setSelectedClient(response.data);
         loadClients();
         showNotification('✅ Endereço removido!');
@@ -359,11 +359,11 @@ export default function Clients() {
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {clients.map((client, index) => (
-                  <tr key={client.id} className="group hover:bg-gray-50/50 transition-colors cursor-pointer"
-                    onClick={() => setSelectedClient(selectedClient?.id === client.id ? null : client)}>
+                  <tr key={client._id} className="group hover:bg-gray-50/50 transition-colors cursor-pointer"
+                    onClick={() => setSelectedClient(selectedClient?._id === client._id ? null : client)}>
                     <td className="px-6 py-4">
                       <p className="font-medium text-gray-900">{client.name}</p>
-                      <p className="text-xs text-gray-500">ID: #{client.id}</p>
+                      <p className="text-xs text-gray-500">ID: #{client._id}</p>
                     </td>
                     <td className="px-6 py-4 hidden md:table-cell">
                       <p className="text-sm text-gray-700 flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-gray-400" />{client.phone}</p>
@@ -552,13 +552,13 @@ export default function Clients() {
             </div>
             <div className="p-6 space-y-4">
               {selectedClient.addresses?.map(addr => (
-                <div key={addr.id} className="flex items-center justify-between bg-gray-50 p-3 rounded-xl">
+                <div key={addr._id} className="flex items-center justify-between bg-gray-50 p-3 rounded-xl">
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-gray-900">{addr.street}</p>
                     <p className="text-xs text-gray-400">{addr.neighborhood} - {addr.city}</p>
                     {addr.daysOfWeek?.length > 0 && <div className="flex gap-1 mt-1">{addr.daysOfWeek.map(d => <span key={d} className="text-xs bg-primary-100 text-primary-700 px-1.5 py-0.5 rounded">{d}</span>)}</div>}
                   </div>
-                  <button onClick={() => removeAddressFromExisting(addr.id)} className="text-red-500 hover:bg-red-50 p-2 rounded-lg"><Trash2 className="w-4 h-4" /></button>
+                  <button onClick={() => removeAddressFromExisting(addr._id)} className="text-red-500 hover:bg-red-50 p-2 rounded-lg"><Trash2 className="w-4 h-4" /></button>
                 </div>
               ))}
               <div className="border-t pt-4">
