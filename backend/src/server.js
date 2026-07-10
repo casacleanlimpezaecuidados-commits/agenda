@@ -4,8 +4,6 @@ const cors = require('cors');
 const path = require('path');
 const { initializeDatabase, connectDatabase } = require('./config/database');
 const { startAutoCloseCron } = require('./config/cron');
-const userRoutes = require('./routes/userRoutes');
-app.use('/api/users', userRoutes);
 
 // Import Routes
 const authRoutes = require('./routes/authRoutes');
@@ -14,6 +12,7 @@ const employeeRoutes = require('./routes/employeeRoutes');
 const scheduleRoutes = require('./routes/scheduleRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const historyRoutes = require('./routes/historyRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -37,6 +36,7 @@ app.use('/api/employees', employeeRoutes);
 app.use('/api/schedules', scheduleRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/history', historyRoutes);
+app.use('/api/users', userRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -61,7 +61,6 @@ async function start() {
     await initializeDatabase();
     console.log('✅ Banco de dados inicializado');
     
-    // No Render, WhatsApp não funciona (não tem interface gráfica)
     if (process.env.RENDER) {
       console.log('⚠️ Ambiente Render - WhatsApp desabilitado');
     } else {
