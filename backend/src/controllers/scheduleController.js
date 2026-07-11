@@ -20,7 +20,6 @@ const scheduleController = {
 
       let schedules = await Schedule.find(query).sort({ date: 1, start_time: 1 });
 
-      // Enriquece com dados de cliente e funcionários
       const enriched = await Promise.all(schedules.map(async (s) => {
         const client = await Client.findById(s.client_id);
         const employees = await Employee.find({ _id: { $in: s.employee_ids } });
@@ -58,7 +57,6 @@ const scheduleController = {
         return res.status(400).json({ error: 'Pelo menos um funcionário é necessário' });
       }
 
-      // Verificar duplicidade
       const duplicate = await Schedule.findOne({
         client_id,
         date,
@@ -73,7 +71,6 @@ const scheduleController = {
         });
       }
 
-      // Criar agendamento
       const schedule = await Schedule.create({
         client_id,
         employee_ids,
@@ -87,7 +84,6 @@ const scheduleController = {
         created_by: req.user.id
       });
 
-      // Registrar no histórico
       const client = await Client.findById(client_id);
       await History.create({
         schedule_id: schedule._id,
@@ -120,14 +116,12 @@ const scheduleController = {
         return res.status(400).json({ error: 'Pelo menos um funcionário é necessário' });
       }
 
-      // Gerar datas
       const generatedDates = generateRecurringDates(start_date, end_date, frequency, days_of_week);
 
       if (generatedDates.length === 0) {
         return res.status(400).json({ error: 'Nenhuma data gerada. Verifique o período e dias selecionados.' });
       }
 
-      // Criar todos os agendamentos
       const createdSchedules = [];
       for (const date of generatedDates) {
         const schedule = await Schedule.create({
@@ -145,7 +139,6 @@ const scheduleController = {
         createdSchedules.push(schedule);
       }
 
-      // Registrar no histórico
       const client = await Client.findById(client_id);
       await History.create({
         user_id: req.user.id,
@@ -186,7 +179,6 @@ const scheduleController = {
       schedule.status = status;
       await schedule.save();
 
-      // Registrar no histórico
       await History.create({
         schedule_id: schedule._id,
         user_id: req.user.id,
@@ -196,7 +188,6 @@ const scheduleController = {
         timestamp: new Date()
       });
 
-      // Criar confirmação se concluído
       if (['concluido', 'concluido_ressalva'].includes(status)) {
         await Confirmation.create({
           schedule_id: schedule._id,
@@ -311,7 +302,6 @@ const scheduleController = {
         };
       }));
 
-      // Gerar CSV
       const csvHeader = 'Data,Dia,Horário,Serviço,Endereço,Funcionários,Status';
       const csvRows = schedulesDetailed.map(s => {
         const formattedDate = s.date.split('-').reverse().join('/');
@@ -469,14 +459,24 @@ function generateRecurringDates(startDate, endDate, frequency, daysOfWeek) {
       current.setDate(current.getDate() + 1);
     }
   } else if (frequency === 'quinzenal') {
+    // Conta 14 dias a partir da primeira data encontrada
     let current = new Date(start);
-    let weekCount = 0;
+    let lastFoundDate = null;
+
     while (current <= end) {
-      if (weekCount % 2 === 0 && targetDays.includes(current.getDay())) {
-        dates.push(current.toISOString().split('T')[0]);
+      if (targetDays.includes(current.getDay())) {
+        if (lastFoundDate === null) {
+          dates.push(current.toISOString().split('T')[0]);
+          lastFoundDate = new Date(current);
+        } else {
+          const diffDays = Math.floor((current - lastFoundDate) / (1000 * 60 * 60 * 24));
+          if (diffDays >= 14) {
+            dates.push(current.toISOString().split('T')[0]);
+            lastFoundDate = new Date(current);
+          }
+        }
       }
       current.setDate(current.getDate() + 1);
-      if (current.getDay() === 0) weekCount++;
     }
   } else if (frequency === 'mensal') {
     const dayOfMonth = start.getDate();
