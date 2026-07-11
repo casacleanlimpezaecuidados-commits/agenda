@@ -108,7 +108,7 @@ export default function Login() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-5" autoComplete="off">
               <div>
                 <label className="label-premium">Email</label>
                 <div className="relative">
@@ -119,6 +119,7 @@ export default function Login() {
                     onChange={(e) => setEmail(e.target.value)}
                     className="input-premium pl-10"
                     placeholder="seu@email.com"
+                    autoComplete="off"
                     required
                   />
                 </div>
@@ -134,6 +135,7 @@ export default function Login() {
                     onChange={(e) => setPassword(e.target.value)}
                     className="input-premium pl-10 pr-10"
                     placeholder="••••••••"
+                    autoComplete="new-password"
                     required
                   />
                   <button
