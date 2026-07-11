@@ -369,8 +369,6 @@ export default function Schedule() {
     }
   };
 
-  // ========== NOVAS FUNÇÕES ==========
-
   const openEditModal = (schedule) => {
     setEditingSchedule({ ...schedule });
     setShowEditModal(true);
@@ -414,8 +412,6 @@ export default function Schedule() {
       }
     }
   };
-
-  // ========== FIM NOVAS FUNÇÕES ==========
 
   const resetForm = () => {
     setFormData({
@@ -524,15 +520,32 @@ export default function Schedule() {
           </div>
         </div>
       )}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div><h1 className="text-3xl font-bold text-gray-900">Agenda</h1><p className="text-gray-500 mt-1">Gerencie todos os agendamentos da sua equipe</p></div>
-        <div className="flex flex-wrap gap-2">
-          <button onClick={() => setShowNewModal(true)} className="btn-primary flex items-center gap-2"><Plus className="w-4 h-4" /> Novo Agendamento</button>
-          <button onClick={() => setShowRecurringModal(true)} className="btn-success flex items-center gap-2"><Repeat className="w-4 h-4" /> Agenda Recorrente</button>
-          <button onClick={() => { setSelectedClientAddresses([]); setReplaceData({ client_id: '', address: '', old_employee_id: '', new_employee_id: '' }); setShowReplaceModal(true); }} className="bg-warning text-white px-4 py-2.5 rounded-xl font-medium hover:bg-amber-600 shadow-soft flex items-center gap-2"><UserCheck className="w-4 h-4" /> Substituir Func.</button>
-          <button onClick={() => setShowDeleteLoteModal(true)} className="bg-danger text-white px-4 py-2.5 rounded-xl font-medium hover:bg-red-600 shadow-soft flex items-center gap-2"><Trash2 className="w-4 h-4" /> Excluir em Lote</button>
+
+      {/* ========== HEADER CORRIGIDO ========== */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div className="flex-shrink-0">
+          <h1 className="text-3xl font-bold text-gray-900">Agenda</h1>
+          <p className="text-gray-500 mt-1">Gerencie todos os agendamentos da sua equipe</p>
+        </div>
+        <div className="flex items-center gap-3 flex-nowrap">
+          <button onClick={() => setShowNewModal(true)} className="btn-primary flex items-center gap-2 h-11 whitespace-nowrap">
+            <Plus className="w-4 h-4 flex-shrink-0" /> <span>Novo Agendamento</span>
+          </button>
+          <button onClick={() => setShowRecurringModal(true)} className="btn-success flex items-center gap-2 h-11 whitespace-nowrap">
+            <Repeat className="w-4 h-4 flex-shrink-0" /> <span>Agenda Recorrente</span>
+          </button>
+          <button onClick={() => { setSelectedClientAddresses([]); setReplaceData({ client_id: '', address: '', old_employee_id: '', new_employee_id: '' }); setShowReplaceModal(true); }} 
+            className="bg-warning text-white px-4 h-11 rounded-xl font-medium hover:bg-amber-600 shadow-soft flex items-center gap-2 whitespace-nowrap transition-all duration-200">
+            <UserCheck className="w-4 h-4 flex-shrink-0" /> <span>Substituir Func.</span>
+          </button>
+          <button onClick={() => setShowDeleteLoteModal(true)} 
+            className="bg-danger text-white px-4 h-11 rounded-xl font-medium hover:bg-red-600 shadow-soft flex items-center gap-2 whitespace-nowrap transition-all duration-200">
+            <Trash2 className="w-4 h-4 flex-shrink-0" /> <span>Excluir em Lote</span>
+          </button>
         </div>
       </div>
+      {/* ========== FIM HEADER CORRIGIDO ========== */}
+
       <div className="card-premium p-4">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -623,43 +636,11 @@ export default function Schedule() {
       {/* MODAL NOVO AGENDAMENTO */}
       <Modal isOpen={showNewModal} onClose={() => { setShowNewModal(false); resetForm(); }} title="Novo Agendamento" size="lg">
         <form onSubmit={handleCreateSchedule} className="space-y-4">
-          <div>
-            <label className="label-premium">Cliente *</label>
-            <select value={formData.client_id} onChange={(e) => handleClientSelect(e.target.value)} className="select-premium" required>
-              <option value="">Selecionar cliente...</option>
-              {clients.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
-            </select>
-          </div>
-          {selectedClientAddresses.length > 0 && (
-            <div>
-              <label className="label-premium">Endereço *</label>
-              <div className="space-y-2 max-h-48 overflow-y-auto">
-                {selectedClientAddresses.map((addr, idx) => (
-                  <label key={idx} className={`flex items-start gap-3 p-3 border rounded-xl cursor-pointer hover:bg-gray-50 ${formData.address === `${addr.street} - ${addr.neighborhood} - ${addr.city}` ? 'border-primary-500 bg-primary-50' : 'border-gray-200'}`}>
-                    <input type="radio" name="address" checked={formData.address === `${addr.street} - ${addr.neighborhood} - ${addr.city}`} onChange={() => handleAddressSelect(addr)} className="mt-0.5" />
-                    <div className="flex-1"><p className="text-sm font-medium text-gray-900">{addr.street}</p><p className="text-xs text-gray-500">{addr.neighborhood} - {addr.city}</p></div>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
-          <div className="grid grid-cols-3 gap-4">
-            <div><label className="label-premium">Data *</label><input type="date" value={formData.date} onChange={(e) => setFormData({...formData, date: e.target.value})} className="input-premium" required /></div>
-            <div><label className="label-premium">Início *</label><input type="time" value={formData.start_time} onChange={(e) => setFormData({...formData, start_time: e.target.value})} className="input-premium" required /></div>
-            <div><label className="label-premium">Fim *</label><input type="time" value={formData.end_time} onChange={(e) => setFormData({...formData, end_time: e.target.value})} className="input-premium" required /></div>
-          </div>
+          <div><label className="label-premium">Cliente *</label><select value={formData.client_id} onChange={(e) => handleClientSelect(e.target.value)} className="select-premium" required><option value="">Selecionar cliente...</option>{clients.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}</select></div>
+          {selectedClientAddresses.length > 0 && (<div><label className="label-premium">Endereço *</label><div className="space-y-2 max-h-48 overflow-y-auto">{selectedClientAddresses.map((addr, idx) => (<label key={idx} className={`flex items-start gap-3 p-3 border rounded-xl cursor-pointer hover:bg-gray-50 ${formData.address === `${addr.street} - ${addr.neighborhood} - ${addr.city}` ? 'border-primary-500 bg-primary-50' : 'border-gray-200'}`}><input type="radio" name="address" checked={formData.address === `${addr.street} - ${addr.neighborhood} - ${addr.city}`} onChange={() => handleAddressSelect(addr)} className="mt-0.5" /><div className="flex-1"><p className="text-sm font-medium text-gray-900">{addr.street}</p><p className="text-xs text-gray-500">{addr.neighborhood} - {addr.city}</p></div></label>))}</div></div>)}
+          <div className="grid grid-cols-3 gap-4"><div><label className="label-premium">Data *</label><input type="date" value={formData.date} onChange={(e) => setFormData({...formData, date: e.target.value})} className="input-premium" required /></div><div><label className="label-premium">Início *</label><input type="time" value={formData.start_time} onChange={(e) => setFormData({...formData, start_time: e.target.value})} className="input-premium" required /></div><div><label className="label-premium">Fim *</label><input type="time" value={formData.end_time} onChange={(e) => setFormData({...formData, end_time: e.target.value})} className="input-premium" required /></div></div>
           <div><label className="label-premium">Serviço *</label><select value={formData.service} onChange={(e) => setFormData({...formData, service: e.target.value})} className="select-premium" required>{SERVICE_TYPES.map(type => <option key={type} value={type}>{type}</option>)}</select></div>
-          <div>
-            <label className="label-premium">Funcionários *</label>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-40 overflow-y-auto">
-              {employees.map(emp => (
-                <label key={emp._id} className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-                  <input type="checkbox" checked={formData.employee_ids.includes(emp._id)} onChange={() => toggleEmployee(emp._id)} className="rounded" />
-                  <span className="text-sm">{emp.name}</span>
-                </label>
-              ))}
-            </div>
-          </div>
+          <div><label className="label-premium">Funcionários *</label><div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-40 overflow-y-auto">{employees.map(emp => (<label key={emp._id} className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50"><input type="checkbox" checked={formData.employee_ids.includes(emp._id)} onChange={() => toggleEmployee(emp._id)} className="rounded" /><span className="text-sm">{emp.name}</span></label>))}</div></div>
           <div><label className="label-premium">Observações</label><textarea value={formData.notes} onChange={(e) => setFormData({...formData, notes: e.target.value})} className="textarea-premium" rows={2} /></div>
           <div className="flex justify-end gap-3 pt-4 border-t"><button type="button" onClick={() => { setShowNewModal(false); resetForm(); }} className="btn-secondary">Cancelar</button><button type="submit" disabled={saving} className="btn-primary">{saving ? 'Salvando...' : 'Criar Agendamento'}</button></div>
         </form>
@@ -669,22 +650,8 @@ export default function Schedule() {
       <Modal isOpen={showRecurringModal} onClose={() => { setShowRecurringModal(false); resetRecurringForm(); }} title="Agenda Recorrente" size="lg">
         <form onSubmit={handleCreateRecurring} className="space-y-4">
           <div><label className="label-premium">Cliente *</label><select value={recurringData.client_id} onChange={(e) => handleClientSelect(e.target.value, true)} className="select-premium" required><option value="">Selecionar cliente...</option>{clients.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}</select></div>
-          {selectedClientAddresses.length > 0 && (
-            <div><label className="label-premium">Endereço *</label><div className="space-y-2 max-h-48 overflow-y-auto">{selectedClientAddresses.map((addr, idx) => (
-              <label key={idx} className={`flex items-start gap-3 p-3 border rounded-xl cursor-pointer hover:bg-gray-50 ${recurringData.address === `${addr.street} - ${addr.neighborhood} - ${addr.city}` ? 'border-primary-500 bg-primary-50' : 'border-gray-200'}`}>
-                <input type="radio" name="rec_addr" checked={recurringData.address === `${addr.street} - ${addr.neighborhood} - ${addr.city}`} onChange={() => handleAddressSelect(addr, true)} className="mt-0.5" />
-                <div className="flex-1"><p className="text-sm font-medium text-gray-900">{addr.street}</p><p className="text-xs text-gray-500">{addr.neighborhood} - {addr.city}</p></div>
-              </label>
-            ))}</div></div>
-          )}
-          <div className="grid grid-cols-2 gap-4">
-            <div><label className="label-premium">Data Início *</label><input type="date" value={recurringData.start_date} onChange={(e) => setRecurringData({...recurringData, start_date: e.target.value})} className="input-premium" required /></div>
-            <div><label className="label-premium">Data Fim *</label><input type="date" value={recurringData.end_date} onChange={(e) => setRecurringData({...recurringData, end_date: e.target.value})} className="input-premium" required /></div>
-            <div><label className="label-premium">Início *</label><input type="time" value={recurringData.start_time} onChange={(e) => setRecurringData({...recurringData, start_time: e.target.value})} className="input-premium" required /></div>
-            <div><label className="label-premium">Fim *</label><input type="time" value={recurringData.end_time} onChange={(e) => setRecurringData({...recurringData, end_time: e.target.value})} className="input-premium" required /></div>
-            <div><label className="label-premium">Serviço *</label><select value={recurringData.service} onChange={(e) => setRecurringData({...recurringData, service: e.target.value})} className="select-premium" required>{SERVICE_TYPES.map(type => <option key={type} value={type}>{type}</option>)}</select></div>
-            <div><label className="label-premium">Frequência *</label><select value={recurringData.frequency} onChange={(e) => setRecurringData({...recurringData, frequency: e.target.value})} className="select-premium" required><option value="semanal">Semanal</option><option value="quinzenal">Quinzenal</option><option value="mensal">Mensal</option></select></div>
-          </div>
+          {selectedClientAddresses.length > 0 && (<div><label className="label-premium">Endereço *</label><div className="space-y-2 max-h-48 overflow-y-auto">{selectedClientAddresses.map((addr, idx) => (<label key={idx} className={`flex items-start gap-3 p-3 border rounded-xl cursor-pointer hover:bg-gray-50 ${recurringData.address === `${addr.street} - ${addr.neighborhood} - ${addr.city}` ? 'border-primary-500 bg-primary-50' : 'border-gray-200'}`}><input type="radio" name="rec_addr" checked={recurringData.address === `${addr.street} - ${addr.neighborhood} - ${addr.city}`} onChange={() => handleAddressSelect(addr, true)} className="mt-0.5" /><div className="flex-1"><p className="text-sm font-medium text-gray-900">{addr.street}</p><p className="text-xs text-gray-500">{addr.neighborhood} - {addr.city}</p></div></label>))}</div></div>)}
+          <div className="grid grid-cols-2 gap-4"><div><label className="label-premium">Data Início *</label><input type="date" value={recurringData.start_date} onChange={(e) => setRecurringData({...recurringData, start_date: e.target.value})} className="input-premium" required /></div><div><label className="label-premium">Data Fim *</label><input type="date" value={recurringData.end_date} onChange={(e) => setRecurringData({...recurringData, end_date: e.target.value})} className="input-premium" required /></div><div><label className="label-premium">Início *</label><input type="time" value={recurringData.start_time} onChange={(e) => setRecurringData({...recurringData, start_time: e.target.value})} className="input-premium" required /></div><div><label className="label-premium">Fim *</label><input type="time" value={recurringData.end_time} onChange={(e) => setRecurringData({...recurringData, end_time: e.target.value})} className="input-premium" required /></div><div><label className="label-premium">Serviço *</label><select value={recurringData.service} onChange={(e) => setRecurringData({...recurringData, service: e.target.value})} className="select-premium" required>{SERVICE_TYPES.map(type => <option key={type} value={type}>{type}</option>)}</select></div><div><label className="label-premium">Frequência *</label><select value={recurringData.frequency} onChange={(e) => setRecurringData({...recurringData, frequency: e.target.value})} className="select-premium" required><option value="semanal">Semanal</option><option value="quinzenal">Quinzenal</option><option value="mensal">Mensal</option></select></div></div>
           <div><label className="label-premium">Dias da Semana *</label><div className="grid grid-cols-7 gap-2">{WEEKDAYS.map(day => <label key={day} className="flex items-center justify-center gap-1 p-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50"><input type="checkbox" checked={recurringData.days_of_week.includes(day)} onChange={() => toggleDayOfWeek(day)} className="rounded" /><span className="text-xs">{day}</span></label>)}</div></div>
           <div><label className="label-premium">Funcionários *</label><div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-40 overflow-y-auto">{employees.map(emp => <label key={emp._id} className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50"><input type="checkbox" checked={recurringData.employee_ids.includes(emp._id)} onChange={() => toggleRecurringEmployee(emp._id)} className="rounded" /><span className="text-sm">{emp.name}</span></label>)}</div></div>
           <div className="flex justify-end gap-3 pt-4 border-t"><button type="button" onClick={() => { setShowRecurringModal(false); resetRecurringForm(); }} className="btn-secondary">Cancelar</button><button type="submit" disabled={saving} className="btn-success">{saving ? 'Gerando...' : 'Gerar Agendamentos'}</button></div>
@@ -697,10 +664,7 @@ export default function Schedule() {
           <div className="bg-blue-50 p-4 rounded-xl text-sm text-blue-800">💡 <strong>Substituição em lote:</strong> Filtre por empresa e endereço.</div>
           <div><label className="label-premium">Empresa/Cliente (opcional)</label><select value={replaceData.client_id} onChange={(e) => { const clientId = e.target.value; setReplaceData({...replaceData, client_id: clientId, address: ''}); if (clientId) { const client = clients.find(c => c._id === clientId); setSelectedClientAddresses(client?.addresses?.length > 0 ? client.addresses : []); } else { setSelectedClientAddresses([]); }}} className="select-premium"><option value="">Todos os clientes</option>{clients.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}</select></div>
           {selectedClientAddresses.length > 0 && replaceData.client_id && <div><label className="label-premium">Endereço (opcional)</label><select value={replaceData.address} onChange={(e) => setReplaceData({...replaceData, address: e.target.value})} className="select-premium"><option value="">Todos</option>{selectedClientAddresses.map((addr, idx) => <option key={idx} value={`${addr.street} - ${addr.neighborhood} - ${addr.city}`}>{addr.street}</option>)}</select></div>}
-          <div className="grid grid-cols-2 gap-4">
-            <div><label className="label-premium">Func. Atual *</label><select value={replaceData.old_employee_id} onChange={(e) => setReplaceData({...replaceData, old_employee_id: e.target.value})} className="select-premium" required><option value="">Selecionar...</option>{employees.map(emp => <option key={emp._id} value={emp._id}>{emp.name}</option>)}</select></div>
-            <div><label className="label-premium">Novo Func. *</label><select value={replaceData.new_employee_id} onChange={(e) => setReplaceData({...replaceData, new_employee_id: e.target.value})} className="select-premium" required><option value="">Selecionar...</option>{employees.filter(e => e._id !== replaceData.old_employee_id).map(emp => <option key={emp._id} value={emp._id}>{emp.name}</option>)}</select></div>
-          </div>
+          <div className="grid grid-cols-2 gap-4"><div><label className="label-premium">Func. Atual *</label><select value={replaceData.old_employee_id} onChange={(e) => setReplaceData({...replaceData, old_employee_id: e.target.value})} className="select-premium" required><option value="">Selecionar...</option>{employees.map(emp => <option key={emp._id} value={emp._id}>{emp.name}</option>)}</select></div><div><label className="label-premium">Novo Func. *</label><select value={replaceData.new_employee_id} onChange={(e) => setReplaceData({...replaceData, new_employee_id: e.target.value})} className="select-premium" required><option value="">Selecionar...</option>{employees.filter(e => e._id !== replaceData.old_employee_id).map(emp => <option key={emp._id} value={emp._id}>{emp.name}</option>)}</select></div></div>
           <div className="flex justify-end gap-3 pt-4 border-t"><button type="button" onClick={() => { setShowReplaceModal(false); setSelectedClientAddresses([]); }} className="btn-secondary">Cancelar</button><button type="submit" disabled={saving} className="bg-warning text-white px-6 py-2.5 rounded-xl font-medium hover:bg-amber-600">{saving ? 'Substituindo...' : 'Substituir em Lote'}</button></div>
         </form>
       </Modal>
@@ -708,12 +672,7 @@ export default function Schedule() {
       {/* MODAL SUBSTITUIÇÃO RÁPIDA */}
       <Modal isOpen={showQuickReplaceModal} onClose={() => setShowQuickReplaceModal(false)} title="Substituir Funcionário" size="sm">
         <form onSubmit={handleQuickReplace} className="space-y-4">
-          <div className="bg-gray-50 p-4 rounded-xl space-y-3">
-            <div className="flex items-center gap-2 text-sm"><Building2 className="w-4 h-4 text-gray-400 flex-shrink-0" /><span className="font-medium text-gray-900">{quickReplaceData.client_name}</span></div>
-            <div className="flex items-center gap-2 text-sm"><Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" /><span className="text-gray-700">{quickReplaceData.date ? new Date(quickReplaceData.date + 'T00:00:00').toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }) : 'Data não informada'}</span></div>
-            <div className="flex items-start gap-2 text-sm"><MapPin className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" /><span className="text-gray-700">{quickReplaceData.address || 'Endereço não informado'}</span></div>
-            <div className="flex items-center gap-2 text-sm border-t border-gray-200 pt-2"><Users className="w-4 h-4 text-gray-400 flex-shrink-0" /><div><span className="text-xs text-gray-500 block">Funcionário Atual</span><span className="font-medium text-gray-900">{quickReplaceData.old_employee_name}</span></div></div>
-          </div>
+          <div className="bg-gray-50 p-4 rounded-xl space-y-3"><div className="flex items-center gap-2 text-sm"><Building2 className="w-4 h-4 text-gray-400 flex-shrink-0" /><span className="font-medium text-gray-900">{quickReplaceData.client_name}</span></div><div className="flex items-center gap-2 text-sm"><Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" /><span className="text-gray-700">{quickReplaceData.date ? new Date(quickReplaceData.date + 'T00:00:00').toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }) : 'Data não informada'}</span></div><div className="flex items-start gap-2 text-sm"><MapPin className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" /><span className="text-gray-700">{quickReplaceData.address || 'Endereço não informado'}</span></div><div className="flex items-center gap-2 text-sm border-t border-gray-200 pt-2"><Users className="w-4 h-4 text-gray-400 flex-shrink-0" /><div><span className="text-xs text-gray-500 block">Funcionário Atual</span><span className="font-medium text-gray-900">{quickReplaceData.old_employee_name}</span></div></div></div>
           <div><label className="label-premium">Substituir por *</label><select value={quickReplaceData.new_employee_id} onChange={(e) => setQuickReplaceData({...quickReplaceData, new_employee_id: e.target.value})} className="select-premium" required><option value="">Selecionar...</option>{employees.filter(e => e._id !== quickReplaceData.old_employee_id).map(emp => <option key={emp._id} value={emp._id}>{emp.name}</option>)}</select></div>
           <div className="bg-amber-50 p-3 rounded-xl text-xs text-amber-700 flex items-start gap-2"><AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" /><span>Substituirá <strong>{quickReplaceData.old_employee_name}</strong> <strong>apenas neste agendamento</strong>.</span></div>
           <div className="flex justify-end gap-3 pt-4 border-t"><button type="button" onClick={() => setShowQuickReplaceModal(false)} className="btn-secondary">Cancelar</button><button type="submit" disabled={saving} className="bg-warning text-white px-6 py-2.5 rounded-xl font-medium hover:bg-amber-600">{saving ? 'Substituindo...' : 'Substituir'}</button></div>
@@ -722,75 +681,17 @@ export default function Schedule() {
 
       {/* MODAL EDITAR AGENDAMENTO */}
       <Modal isOpen={showEditModal} onClose={() => setShowEditModal(false)} title="Editar Agendamento" size="lg">
-        {editingSchedule && (
-          <form onSubmit={handleUpdateSchedule} className="space-y-4">
-            <div className="bg-gray-50 p-4 rounded-xl">
-              <p className="text-sm font-medium text-gray-900">{editingSchedule.client_name}</p>
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <label className="label-premium">Data *</label>
-                <input type="date" value={editingSchedule.date || ''} onChange={(e) => setEditingSchedule({...editingSchedule, date: e.target.value})} className="input-premium" required />
-              </div>
-              <div>
-                <label className="label-premium">Início *</label>
-                <input type="time" value={editingSchedule.start_time || ''} onChange={(e) => setEditingSchedule({...editingSchedule, start_time: e.target.value})} className="input-premium" required />
-              </div>
-              <div>
-                <label className="label-premium">Fim *</label>
-                <input type="time" value={editingSchedule.end_time || ''} onChange={(e) => setEditingSchedule({...editingSchedule, end_time: e.target.value})} className="input-premium" required />
-              </div>
-            </div>
-            <div>
-              <label className="label-premium">Serviço *</label>
-              <select value={editingSchedule.service || ''} onChange={(e) => setEditingSchedule({...editingSchedule, service: e.target.value})} className="select-premium" required>
-                {SERVICE_TYPES.map(type => <option key={type} value={type}>{type}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="label-premium">Endereço *</label>
-              <input type="text" value={editingSchedule.address || ''} onChange={(e) => setEditingSchedule({...editingSchedule, address: e.target.value})} className="input-premium" required />
-            </div>
-            <div>
-              <label className="label-premium">Observações</label>
-              <textarea value={editingSchedule.notes || ''} onChange={(e) => setEditingSchedule({...editingSchedule, notes: e.target.value})} className="textarea-premium" rows={2} />
-            </div>
-            <div className="flex justify-end gap-3 pt-4 border-t">
-              <button type="button" onClick={() => setShowEditModal(false)} className="btn-secondary">Cancelar</button>
-              <button type="submit" disabled={saving} className="btn-primary">{saving ? 'Salvando...' : 'Salvar Alterações'}</button>
-            </div>
-          </form>
-        )}
+        {editingSchedule && (<form onSubmit={handleUpdateSchedule} className="space-y-4"><div className="bg-gray-50 p-4 rounded-xl"><p className="text-sm font-medium text-gray-900">{editingSchedule.client_name}</p></div><div className="grid grid-cols-3 gap-4"><div><label className="label-premium">Data *</label><input type="date" value={editingSchedule.date || ''} onChange={(e) => setEditingSchedule({...editingSchedule, date: e.target.value})} className="input-premium" required /></div><div><label className="label-premium">Início *</label><input type="time" value={editingSchedule.start_time || ''} onChange={(e) => setEditingSchedule({...editingSchedule, start_time: e.target.value})} className="input-premium" required /></div><div><label className="label-premium">Fim *</label><input type="time" value={editingSchedule.end_time || ''} onChange={(e) => setEditingSchedule({...editingSchedule, end_time: e.target.value})} className="input-premium" required /></div></div><div><label className="label-premium">Serviço *</label><select value={editingSchedule.service || ''} onChange={(e) => setEditingSchedule({...editingSchedule, service: e.target.value})} className="select-premium" required>{SERVICE_TYPES.map(type => <option key={type} value={type}>{type}</option>)}</select></div><div><label className="label-premium">Endereço *</label><input type="text" value={editingSchedule.address || ''} onChange={(e) => setEditingSchedule({...editingSchedule, address: e.target.value})} className="input-premium" required /></div><div><label className="label-premium">Observações</label><textarea value={editingSchedule.notes || ''} onChange={(e) => setEditingSchedule({...editingSchedule, notes: e.target.value})} className="textarea-premium" rows={2} /></div><div className="flex justify-end gap-3 pt-4 border-t"><button type="button" onClick={() => setShowEditModal(false)} className="btn-secondary">Cancelar</button><button type="submit" disabled={saving} className="btn-primary">{saving ? 'Salvando...' : 'Salvar Alterações'}</button></div></form>)}
       </Modal>
 
       {/* MODAL EXCLUIR EM LOTE */}
       <Modal isOpen={showDeleteLoteModal} onClose={() => setShowDeleteLoteModal(false)} title="Excluir Agendamentos em Lote" size="sm">
-        <div className="space-y-4">
-          <p className="text-sm text-gray-600">Selecione o cliente para excluir todos os agendamentos pendentes.</p>
-          <div>
-            <label className="label-premium">Cliente *</label>
-            <select value={deleteLoteClientId} onChange={(e) => setDeleteLoteClientId(e.target.value)} className="select-premium" required>
-              <option value="">Selecionar cliente...</option>
-              {clients.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
-            </select>
-          </div>
-          <div className="bg-red-50 p-3 rounded-xl text-xs text-red-700 flex items-start gap-2">
-            <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-            <span>Esta ação <strong>não pode ser desfeita</strong>. Todos os agendamentos pendentes deste cliente serão excluídos.</span>
-          </div>
-          <div className="flex justify-end gap-3 pt-4 border-t">
-            <button type="button" onClick={() => setShowDeleteLoteModal(false)} className="btn-secondary">Cancelar</button>
-            <button onClick={handleDeleteByClient} disabled={!deleteLoteClientId || saving} className="bg-danger text-white px-6 py-2.5 rounded-xl font-medium hover:bg-red-600">{saving ? 'Excluindo...' : 'Excluir Todos'}</button>
-          </div>
-        </div>
+        <div className="space-y-4"><p className="text-sm text-gray-600">Selecione o cliente para excluir todos os agendamentos pendentes.</p><div><label className="label-premium">Cliente *</label><select value={deleteLoteClientId} onChange={(e) => setDeleteLoteClientId(e.target.value)} className="select-premium" required><option value="">Selecionar cliente...</option>{clients.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}</select></div><div className="bg-red-50 p-3 rounded-xl text-xs text-red-700 flex items-start gap-2"><AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" /><span>Esta ação <strong>não pode ser desfeita</strong>.</span></div><div className="flex justify-end gap-3 pt-4 border-t"><button type="button" onClick={() => setShowDeleteLoteModal(false)} className="btn-secondary">Cancelar</button><button onClick={handleDeleteByClient} disabled={!deleteLoteClientId || saving} className="bg-danger text-white px-6 py-2.5 rounded-xl font-medium hover:bg-red-600">{saving ? 'Excluindo...' : 'Excluir Todos'}</button></div></div>
       </Modal>
 
       {/* MODAL ALTERAR STATUS */}
       <Modal isOpen={showStatusModal} onClose={() => setShowStatusModal(false)} title="Alterar Status" size="sm">
-        <form onSubmit={handleStatusChange} className="space-y-4">
-          <div><label className="label-premium">Novo Status *</label><select value={statusData.status} onChange={(e) => setStatusData({...statusData, status: e.target.value})} className="select-premium" required><option value="">Selecionar...</option>{STATUS_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}</select></div>
-          <div className="flex justify-end gap-3 pt-4 border-t"><button type="button" onClick={() => setShowStatusModal(false)} className="btn-secondary">Cancelar</button><button type="submit" disabled={saving} className="btn-primary">{saving ? 'Salvando...' : 'Salvar'}</button></div>
-        </form>
+        <form onSubmit={handleStatusChange} className="space-y-4"><div><label className="label-premium">Novo Status *</label><select value={statusData.status} onChange={(e) => setStatusData({...statusData, status: e.target.value})} className="select-premium" required><option value="">Selecionar...</option>{STATUS_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}</select></div><div className="flex justify-end gap-3 pt-4 border-t"><button type="button" onClick={() => setShowStatusModal(false)} className="btn-secondary">Cancelar</button><button type="submit" disabled={saving} className="btn-primary">{saving ? 'Salvando...' : 'Salvar'}</button></div></form>
       </Modal>
 
       {/* Legenda */}
