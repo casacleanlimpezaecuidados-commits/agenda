@@ -20,7 +20,6 @@ const employeeController = {
 
       let employees = await Employee.find(query).sort({ created_at: -1 });
 
-      // Adicionar contagem de agendamentos
       const enriched = await Promise.all(employees.map(async (emp) => {
         const totalSchedules = await Schedule.countDocuments({ employee_ids: emp._id });
         const todaySchedules = await Schedule.countDocuments({
@@ -45,7 +44,6 @@ const employeeController = {
       const { name, phone } = req.body;
       if (!name || !phone) return res.status(400).json({ error: 'Nome e telefone obrigatórios' });
 
-      // Criar com todos os campos incluindo type
       const employee = await Employee.create({
         name: req.body.name,
         phone: req.body.phone,
@@ -58,7 +56,7 @@ const employeeController = {
       await History.create({
         user_id: req.user.id,
         action: 'criou_funcionario',
-        new_value: `Funcionário: ${employee.name} (${employee.type === 'clt' ? 'CLT' : 'Diarista'})`,
+        new_value: `Funcionário: ${employee.name} (${employee.type === 'clt' ? 'CLT' : employee.type === 'diarista' ? 'Diarista' : 'Fora de Folha'})`,
         timestamp: new Date()
       });
 
@@ -82,9 +80,10 @@ const employeeController = {
 
   async update(req, res) {
     try {
-      // Garantir que o type seja enviado na atualização
       const updateData = { ...req.body };
-      if (updateData.type && !['clt', 'diarista'].includes(updateData.type)) {
+      
+      // ✅ CORRIGIDO: adicionado 'fora_de_folha' na lista de tipos válidos
+      if (updateData.type && !['clt', 'diarista', 'fora_de_folha'].includes(updateData.type)) {
         delete updateData.type;
       }
 
