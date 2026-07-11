@@ -49,19 +49,19 @@ export default function Employees() {
   const typeLabels = {
     clt: 'CLT',
     diarista: 'Diarista',
-    folguista: 'Folguista',
+    fora_de_folha: 'Fora de Folha',
   };
 
   const typeColors = {
     clt: 'bg-blue-100 text-blue-700 border-blue-200',
     diarista: 'bg-orange-100 text-orange-700 border-orange-200',
-    folguista: 'bg-green-100 text-green-700 border-green-200',
+    fora_de_folha: 'bg-green-100 text-green-700 border-green-200',
   };
 
   const typeIcons = {
     clt: Briefcase,
     diarista: Clock,
-    folguista: RefreshCw,
+    fora_de_folha: RefreshCw,
   };
 
   useEffect(() => {
@@ -239,7 +239,7 @@ export default function Employees() {
         <div className="card-premium p-4 bg-gradient-to-br from-green-50 to-white">
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center"><RefreshCw className="w-5 h-5 text-green-700" /></div>
-            <div><p className="text-xl font-bold text-gray-900">{employees.filter(e => e.type === 'folguista').length}</p><p className="text-xs text-gray-500">Folguistas</p></div>
+            <div><p className="text-xl font-bold text-gray-900">{employees.filter(e => e.type === 'fora_de_folha').length}</p><p className="text-xs text-gray-500">Fora de Folha</p></div>
           </div>
         </div>
       </div>
@@ -406,7 +406,7 @@ export default function Employees() {
                 <select value={form.type} onChange={(e) => setForm({...form, type: e.target.value})} className="select-premium" required>
                   <option value="clt">CLT (Fixo)</option>
                   <option value="diarista">Diarista</option>
-                  <option value="folguista">Folguista</option>
+                  <option value="fora_de_folha">Fora de Folha</option>
                 </select>
               </div>
               <div className="flex gap-3 pt-4 border-t">
