@@ -75,7 +75,11 @@ export default function Schedule() {
   const [showReplaceModal, setShowReplaceModal] = useState(false);
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [showQuickReplaceModal, setShowQuickReplaceModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteLoteModal, setShowDeleteLoteModal] = useState(false);
+  const [deleteLoteClientId, setDeleteLoteClientId] = useState('');
   const [selectedClientAddresses, setSelectedClientAddresses] = useState([]);
+  const [editingSchedule, setEditingSchedule] = useState(null);
 
   const [formData, setFormData] = useState({
     client_id: '',
@@ -365,6 +369,54 @@ export default function Schedule() {
     }
   };
 
+  // ========== NOVAS FUNÇÕES ==========
+
+  const openEditModal = (schedule) => {
+    setEditingSchedule({ ...schedule });
+    setShowEditModal(true);
+  };
+
+  const handleUpdateSchedule = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await api.put(`/schedules/${editingSchedule._id}`, {
+        date: editingSchedule.date,
+        start_time: editingSchedule.start_time,
+        end_time: editingSchedule.end_time,
+        service: editingSchedule.service,
+        address: editingSchedule.address,
+        notes: editingSchedule.notes,
+        employee_ids: editingSchedule.employee_ids
+      });
+      setShowEditModal(false);
+      await loadSchedules();
+      showNotification('✅ Agendamento atualizado!');
+    } catch (error) {
+      showNotification('❌ Erro: ' + (error.response?.data?.error || error.message), 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteByClient = async () => {
+    if (confirm('Excluir TODOS os agendamentos pendentes deste cliente?')) {
+      setSaving(true);
+      try {
+        const response = await api.delete(`/schedules/client/${deleteLoteClientId}`);
+        setShowDeleteLoteModal(false);
+        await loadSchedules();
+        showNotification(`✅ ${response.data.deleted_count} agendamentos excluídos!`);
+      } catch (error) {
+        showNotification('❌ Erro: ' + (error.response?.data?.error || error.message), 'error');
+      } finally {
+        setSaving(false);
+      }
+    }
+  };
+
+  // ========== FIM NOVAS FUNÇÕES ==========
+
   const resetForm = () => {
     setFormData({
       client_id: '', employee_ids: [], date: '', start_time: '07:00', end_time: '17:00',
@@ -478,6 +530,7 @@ export default function Schedule() {
           <button onClick={() => setShowNewModal(true)} className="btn-primary flex items-center gap-2"><Plus className="w-4 h-4" /> Novo Agendamento</button>
           <button onClick={() => setShowRecurringModal(true)} className="btn-success flex items-center gap-2"><Repeat className="w-4 h-4" /> Agenda Recorrente</button>
           <button onClick={() => { setSelectedClientAddresses([]); setReplaceData({ client_id: '', address: '', old_employee_id: '', new_employee_id: '' }); setShowReplaceModal(true); }} className="bg-warning text-white px-4 py-2.5 rounded-xl font-medium hover:bg-amber-600 shadow-soft flex items-center gap-2"><UserCheck className="w-4 h-4" /> Substituir Func.</button>
+          <button onClick={() => setShowDeleteLoteModal(true)} className="bg-danger text-white px-4 py-2.5 rounded-xl font-medium hover:bg-red-600 shadow-soft flex items-center gap-2"><Trash2 className="w-4 h-4" /> Excluir em Lote</button>
         </div>
       </div>
       <div className="card-premium p-4">
@@ -547,6 +600,7 @@ export default function Schedule() {
                     <div className="flex items-center gap-1.5">
                       <StatusBadge status={schedule.status} />
                       <button onClick={() => { setStatusData({ schedule_id: schedule._id, status: schedule.status }); setShowStatusModal(true); }} className="p-1.5 hover:bg-gray-100 rounded-lg" title="Alterar status"><RefreshCw className="w-4 h-4 text-gray-400" /></button>
+                      <button onClick={() => openEditModal(schedule)} className="p-1.5 hover:bg-blue-50 rounded-lg" title="Editar agendamento"><Edit3 className="w-4 h-4 text-gray-400 hover:text-blue-600" /></button>
                       <button onClick={() => openQuickReplace(schedule)} className="p-1.5 hover:bg-amber-50 rounded-lg" title="Substituir funcionário"><UserCheck className="w-4 h-4 text-gray-400 hover:text-warning" /></button>
                       <button onClick={() => handleDeleteSchedule(schedule._id, schedule.client_name)} className="p-1.5 hover:bg-gray-100 rounded-lg" title="Excluir"><Trash2 className="w-4 h-4 text-gray-400 hover:text-danger" /></button>
                     </div>
@@ -664,6 +718,71 @@ export default function Schedule() {
           <div className="bg-amber-50 p-3 rounded-xl text-xs text-amber-700 flex items-start gap-2"><AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" /><span>Substituirá <strong>{quickReplaceData.old_employee_name}</strong> <strong>apenas neste agendamento</strong>.</span></div>
           <div className="flex justify-end gap-3 pt-4 border-t"><button type="button" onClick={() => setShowQuickReplaceModal(false)} className="btn-secondary">Cancelar</button><button type="submit" disabled={saving} className="bg-warning text-white px-6 py-2.5 rounded-xl font-medium hover:bg-amber-600">{saving ? 'Substituindo...' : 'Substituir'}</button></div>
         </form>
+      </Modal>
+
+      {/* MODAL EDITAR AGENDAMENTO */}
+      <Modal isOpen={showEditModal} onClose={() => setShowEditModal(false)} title="Editar Agendamento" size="lg">
+        {editingSchedule && (
+          <form onSubmit={handleUpdateSchedule} className="space-y-4">
+            <div className="bg-gray-50 p-4 rounded-xl">
+              <p className="text-sm font-medium text-gray-900">{editingSchedule.client_name}</p>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="label-premium">Data *</label>
+                <input type="date" value={editingSchedule.date || ''} onChange={(e) => setEditingSchedule({...editingSchedule, date: e.target.value})} className="input-premium" required />
+              </div>
+              <div>
+                <label className="label-premium">Início *</label>
+                <input type="time" value={editingSchedule.start_time || ''} onChange={(e) => setEditingSchedule({...editingSchedule, start_time: e.target.value})} className="input-premium" required />
+              </div>
+              <div>
+                <label className="label-premium">Fim *</label>
+                <input type="time" value={editingSchedule.end_time || ''} onChange={(e) => setEditingSchedule({...editingSchedule, end_time: e.target.value})} className="input-premium" required />
+              </div>
+            </div>
+            <div>
+              <label className="label-premium">Serviço *</label>
+              <select value={editingSchedule.service || ''} onChange={(e) => setEditingSchedule({...editingSchedule, service: e.target.value})} className="select-premium" required>
+                {SERVICE_TYPES.map(type => <option key={type} value={type}>{type}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="label-premium">Endereço *</label>
+              <input type="text" value={editingSchedule.address || ''} onChange={(e) => setEditingSchedule({...editingSchedule, address: e.target.value})} className="input-premium" required />
+            </div>
+            <div>
+              <label className="label-premium">Observações</label>
+              <textarea value={editingSchedule.notes || ''} onChange={(e) => setEditingSchedule({...editingSchedule, notes: e.target.value})} className="textarea-premium" rows={2} />
+            </div>
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <button type="button" onClick={() => setShowEditModal(false)} className="btn-secondary">Cancelar</button>
+              <button type="submit" disabled={saving} className="btn-primary">{saving ? 'Salvando...' : 'Salvar Alterações'}</button>
+            </div>
+          </form>
+        )}
+      </Modal>
+
+      {/* MODAL EXCLUIR EM LOTE */}
+      <Modal isOpen={showDeleteLoteModal} onClose={() => setShowDeleteLoteModal(false)} title="Excluir Agendamentos em Lote" size="sm">
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600">Selecione o cliente para excluir todos os agendamentos pendentes.</p>
+          <div>
+            <label className="label-premium">Cliente *</label>
+            <select value={deleteLoteClientId} onChange={(e) => setDeleteLoteClientId(e.target.value)} className="select-premium" required>
+              <option value="">Selecionar cliente...</option>
+              {clients.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
+            </select>
+          </div>
+          <div className="bg-red-50 p-3 rounded-xl text-xs text-red-700 flex items-start gap-2">
+            <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <span>Esta ação <strong>não pode ser desfeita</strong>. Todos os agendamentos pendentes deste cliente serão excluídos.</span>
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <button type="button" onClick={() => setShowDeleteLoteModal(false)} className="btn-secondary">Cancelar</button>
+            <button onClick={handleDeleteByClient} disabled={!deleteLoteClientId || saving} className="bg-danger text-white px-6 py-2.5 rounded-xl font-medium hover:bg-red-600">{saving ? 'Excluindo...' : 'Excluir Todos'}</button>
+          </div>
+        </div>
       </Modal>
 
       {/* MODAL ALTERAR STATUS */}

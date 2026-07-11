@@ -45,11 +45,11 @@ export default function Clients() {
     notes: '',
   });
 
-  // Endereços durante o cadastro/edição
+  // Endereços durante o cadastro
   const [formAddresses, setFormAddresses] = useState([]);
   const [showAddressSection, setShowAddressSection] = useState(true);
-  
-  // Novo endereço sendo preenchido
+
+  // Novo endereço
   const [newAddress, setNewAddress] = useState({
     street: '',
     neighborhood: '',
@@ -58,8 +58,12 @@ export default function Clients() {
     daysOfWeek: [],
   });
 
-  // Modal de endereços (para cliente já existente)
+  // Modal de endereços (gerenciar)
   const [showAddressModal, setShowAddressModal] = useState(false);
+
+  // EDIÇÃO DE ENDEREÇO
+  const [showEditAddressModal, setShowEditAddressModal] = useState(false);
+  const [editingAddress, setEditingAddress] = useState(null);
 
   useEffect(() => {
     loadClients();
@@ -84,14 +88,12 @@ export default function Clients() {
     }
   };
 
-  // ========== ADICIONAR ENDEREÇO NA LISTA DO FORMULÁRIO ==========
+  // Adicionar endereço na lista do formulário
   const addAddressToForm = () => {
     if (!newAddress.street.trim()) {
       showNotification('❌ O endereço é obrigatório', 'error');
       return;
     }
-
-    // Verificar duplicidade
     const duplicate = formAddresses.find(a =>
       a.street.toLowerCase().trim() === newAddress.street.toLowerCase().trim()
     );
@@ -99,17 +101,14 @@ export default function Clients() {
       showNotification('❌ Este endereço já foi adicionado', 'error');
       return;
     }
-
     setFormAddresses([...formAddresses, { ...newAddress }]);
     setNewAddress({ street: '', neighborhood: '', city: '', reference: '', daysOfWeek: [] });
   };
 
-  // Remover endereço da lista
   const removeAddressFromForm = (index) => {
     setFormAddresses(formAddresses.filter((_, i) => i !== index));
   };
 
-  // Alternar dia da semana
   const toggleDay = (day) => {
     const days = [...newAddress.daysOfWeek];
     if (days.includes(day)) {
@@ -119,37 +118,28 @@ export default function Clients() {
     }
   };
 
-  // ========== CRIAR/EDITAR CLIENTE ==========
+  // Criar/Editar cliente
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!form.name.trim() || !form.phone.trim()) {
       showNotification('❌ Nome e telefone são obrigatórios', 'error');
       return;
     }
-
     setSaving(true);
-
     try {
       if (editingClient) {
-        // Atualizar cliente existente
         await api.put(`/clients/${editingClient._id}`, form);
-        showNotification('✅ Cliente atualizado com sucesso!');
+        showNotification('✅ Cliente atualizado!');
       } else {
-        // 1. Criar o cliente primeiro
         const clientData = {
           ...form,
           address: formAddresses.length > 0 ? formAddresses[0].street : '',
           neighborhood: formAddresses.length > 0 ? formAddresses[0].neighborhood : '',
         };
-
         const clientResponse = await api.post('/clients', clientData);
-        const newClientId = clientResponse.data._id;
-
-        // 2. Adicionar os endereços um por um
         if (formAddresses.length > 0) {
           for (const addr of formAddresses) {
-            await api.post(`/clients/${newClientId}/addresses`, {
+            await api.post(`/clients/${clientResponse.data._id}/addresses`, {
               street: addr.street,
               neighborhood: addr.neighborhood || '',
               city: addr.city || form.city || '',
@@ -159,20 +149,17 @@ export default function Clients() {
             });
           }
         }
-
         showNotification(`✅ Cliente cadastrado com ${formAddresses.length} endereço(s)!`);
       }
-
       setShowModal(false);
       setEditingClient(null);
       resetForm();
       loadClients();
     } catch (error) {
-      console.error('Erro:', error);
       if (error.response?.status === 409) {
         showNotification('❌ ' + error.response.data.error, 'error');
       } else {
-        showNotification('❌ Erro ao salvar: ' + (error.response?.data?.error || error.message), 'error');
+        showNotification('❌ Erro ao salvar', 'error');
       }
     } finally {
       setSaving(false);
@@ -189,7 +176,7 @@ export default function Clients() {
       state: client.state || 'MG',
       notes: client.notes || '',
     });
-    setFormAddresses([]); // Não carregar endereços existentes na edição
+    setFormAddresses([]);
     setShowModal(true);
   };
 
@@ -219,7 +206,7 @@ export default function Clients() {
     setShowAddressSection(true);
   };
 
-  // ========== ADICIONAR ENDEREÇO A CLIENTE EXISTENTE ==========
+  // Gerenciar endereços (cliente existente)
   const openAddressModal = async (client) => {
     try {
       const response = await api.get(`/clients/${client._id}`);
@@ -251,8 +238,36 @@ export default function Clients() {
     }
   };
 
+  // EDITAR ENDEREÇO EXISTENTE
+  const openEditAddressModal = (address) => {
+    setEditingAddress({ ...address });
+    setShowEditAddressModal(true);
+  };
+
+  const handleUpdateAddress = async (e) => {
+    e.preventDefault();
+    if (!editingAddress.street.trim()) {
+      showNotification('❌ Endereço obrigatório', 'error');
+      return;
+    }
+    setSaving(true);
+    try {
+      await api.put(`/clients/${selectedClient._id}/addresses/${editingAddress._id}`, editingAddress);
+      const response = await api.get(`/clients/${selectedClient._id}`);
+      setSelectedClient(response.data);
+      setShowEditAddressModal(false);
+      setEditingAddress(null);
+      loadClients();
+      showNotification('✅ Endereço atualizado!');
+    } catch (error) {
+      showNotification('❌ Erro ao atualizar endereço', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const removeAddressFromExisting = async (addressId) => {
-    if (confirm('Remover endereço?')) {
+    if (confirm('Remover este endereço?')) {
       try {
         await api.delete(`/clients/${selectedClient._id}/addresses/${addressId}`);
         const response = await api.get(`/clients/${selectedClient._id}`);
@@ -363,7 +378,6 @@ export default function Clients() {
                     onClick={() => setSelectedClient(selectedClient?._id === client._id ? null : client)}>
                     <td className="px-6 py-4">
                       <p className="font-medium text-gray-900">{client.name}</p>
-                      <p className="text-xs text-gray-500">ID: #{client._id}</p>
                     </td>
                     <td className="px-6 py-4 hidden md:table-cell">
                       <p className="text-sm text-gray-700 flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-gray-400" />{client.phone}</p>
@@ -456,7 +470,7 @@ export default function Clients() {
         </div>
       )}
 
-      {/* ========== MODAL - CRIAR/EDITAR CLIENTE (COM ENDEREÇOS) ========== */}
+      {/* MODAL - CRIAR/EDITAR CLIENTE */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto animate-scale-in">
@@ -465,7 +479,6 @@ export default function Clients() {
               <button onClick={() => { setShowModal(false); resetForm(); }} className="p-1.5 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5 text-gray-500" /></button>
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              {/* Dados básicos */}
               <div className="grid grid-cols-2 gap-4">
                 <div><label className="label-premium">Nome *</label><input type="text" value={form.name} onChange={(e) => setForm({...form, name: e.target.value})} className="input-premium" required /></div>
                 <div><label className="label-premium">Telefone *</label><input type="text" value={form.phone} onChange={(e) => setForm({...form, phone: e.target.value})} className="input-premium" required /></div>
@@ -476,7 +489,6 @@ export default function Clients() {
               </div>
               <div><label className="label-premium">Observações</label><textarea value={form.notes} onChange={(e) => setForm({...form, notes: e.target.value})} className="textarea-premium" rows={2} /></div>
 
-              {/* Seção de Endereços */}
               {!editingClient && (
                 <div className="border-t pt-4">
                   <button type="button" onClick={() => setShowAddressSection(!showAddressSection)}
@@ -484,10 +496,8 @@ export default function Clients() {
                     <h3 className="font-semibold text-gray-900">📍 Endereços ({formAddresses.length})</h3>
                     {showAddressSection ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
                   </button>
-
                   {showAddressSection && (
                     <div className="space-y-3">
-                      {/* Lista de endereços adicionados */}
                       {formAddresses.map((addr, idx) => (
                         <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
                           <div className="flex-1 min-w-0">
@@ -500,8 +510,6 @@ export default function Clients() {
                           <button type="button" onClick={() => removeAddressFromForm(idx)} className="p-1.5 text-gray-400 hover:text-danger"><Trash2 className="w-4 h-4" /></button>
                         </div>
                       ))}
-
-                      {/* Formulário para novo endereço */}
                       <div className="p-4 border border-dashed border-gray-300 rounded-xl space-y-3">
                         <p className="text-sm font-medium text-gray-700">Novo Endereço</p>
                         <div><input type="text" value={newAddress.street} onChange={(e) => setNewAddress({...newAddress, street: e.target.value})} className="input-premium text-sm" placeholder="Rua, número *" /></div>
@@ -542,7 +550,7 @@ export default function Clients() {
         </div>
       )}
 
-      {/* ========== MODAL - ENDEREÇOS (CLIENTE EXISTENTE) ========== */}
+      {/* MODAL - GERENCIAR ENDEREÇOS */}
       {showAddressModal && selectedClient && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto animate-scale-in">
@@ -558,7 +566,14 @@ export default function Clients() {
                     <p className="text-xs text-gray-400">{addr.neighborhood} - {addr.city}</p>
                     {addr.daysOfWeek?.length > 0 && <div className="flex gap-1 mt-1">{addr.daysOfWeek.map(d => <span key={d} className="text-xs bg-primary-100 text-primary-700 px-1.5 py-0.5 rounded">{d}</span>)}</div>}
                   </div>
-                  <button onClick={() => removeAddressFromExisting(addr._id)} className="text-red-500 hover:bg-red-50 p-2 rounded-lg"><Trash2 className="w-4 h-4" /></button>
+                  <div className="flex items-center gap-1">
+                    <button onClick={() => openEditAddressModal(addr)} className="p-2 text-gray-400 hover:text-primary-600 hover:bg-gray-100 rounded-lg" title="Editar endereço">
+                      <Edit3 className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => removeAddressFromExisting(addr._id)} className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg" title="Remover endereço">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               ))}
               <div className="border-t pt-4">
@@ -583,6 +598,54 @@ export default function Clients() {
               </div>
               <button type="button" onClick={() => { setShowAddressModal(false); loadClients(); }} className="w-full py-2.5 bg-primary-800 text-white rounded-xl hover:bg-primary-900 font-medium">Concluído</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL - EDITAR ENDEREÇO */}
+      {showEditAddressModal && editingAddress && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md animate-scale-in">
+            <div className="flex items-center justify-between p-6 border-b border-gray-100">
+              <h3 className="text-lg font-bold">✏️ Editar Endereço</h3>
+              <button onClick={() => { setShowEditAddressModal(false); setEditingAddress(null); }} className="p-1.5 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5 text-gray-500" /></button>
+            </div>
+            <form onSubmit={handleUpdateAddress} className="p-6 space-y-4">
+              <div>
+                <label className="label-premium">Endereço *</label>
+                <input type="text" value={editingAddress.street || ''} onChange={(e) => setEditingAddress({...editingAddress, street: e.target.value})} className="input-premium" required />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><label className="label-premium">Bairro</label><input type="text" value={editingAddress.neighborhood || ''} onChange={(e) => setEditingAddress({...editingAddress, neighborhood: e.target.value})} className="input-premium" /></div>
+                <div><label className="label-premium">Cidade</label><input type="text" value={editingAddress.city || ''} onChange={(e) => setEditingAddress({...editingAddress, city: e.target.value})} className="input-premium" /></div>
+              </div>
+              <div>
+                <label className="label-premium">Referência</label>
+                <input type="text" value={editingAddress.reference || ''} onChange={(e) => setEditingAddress({...editingAddress, reference: e.target.value})} className="input-premium" />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 mb-1 block">Dias da semana</label>
+                <div className="flex flex-wrap gap-1">
+                  {WEEKDAYS.map(day => (
+                    <button key={day} type="button" onClick={() => {
+                      const days = editingAddress.daysOfWeek || [];
+                      if (days.includes(day)) {
+                        setEditingAddress({...editingAddress, daysOfWeek: days.filter(d => d !== day)});
+                      } else {
+                        setEditingAddress({...editingAddress, daysOfWeek: [...days, day]});
+                      }
+                    }}
+                      className={`px-2.5 py-1 text-xs rounded-lg border transition-all ${(editingAddress.daysOfWeek || []).includes(day) ? 'bg-primary-800 text-white border-primary-800' : 'bg-white text-gray-600 border-gray-200'}`}>
+                      {day}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4 border-t">
+                <button type="button" onClick={() => { setShowEditAddressModal(false); setEditingAddress(null); }} className="btn-secondary flex-1">Cancelar</button>
+                <button type="submit" disabled={saving} className="btn-primary flex-1">{saving ? 'Salvando...' : 'Salvar'}</button>
+              </div>
+            </form>
           </div>
         </div>
       )}
