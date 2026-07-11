@@ -31,16 +31,21 @@ const MONTHS = [
 ];
 
 const SERVICE_TYPES = [
-  'Limpeza Residencial',
-  'Limpeza Comercial',
-  'Limpeza de Apartamento',
-  'Limpeza Pós-Obra',
-  'Limpeza de Alojamento',
-  'Limpeza de Escritório',
-  'Limpeza de Condomínio',
-  'Limpeza de Igreja',
-  'Meia Diária',
-  'Diária Completa',
+  'Diária Completa - Limpeza Residencial',
+  'Diária Completa - Limpeza de Apartamento',
+  'Diária Completa - Limpeza Pós-Obra',
+  'Diária Completa - Limpeza de Alojamento',
+  'Diária Completa - Limpeza de Escritório',
+  'Diária Completa - Limpeza de Condomínio',
+  'Diária Completa - Limpeza de Igreja',
+  'Diária Completa - Limpeza de Escola',
+  'Meia Diária - Limpeza Residencial',
+  'Meia Diária - Limpeza de Apartamento',
+  'Meia Diária - Limpeza de Alojamento',
+  'Meia Diária - Limpeza de Escritório',
+  'Meia Diária - Limpeza de Condomínio',
+  'Meia Diária - Limpeza de Igreja',
+  'Meia Diária - Limpeza de Escola',
 ];
 
 const STATUS_OPTIONS = [

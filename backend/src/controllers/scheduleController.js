@@ -12,6 +12,7 @@ const scheduleController = {
         const endDate = `${year}-${String(month).padStart(2, '0')}-31`;
         query.date = { $gte: startDate, $lte: endDate };
       }
+
       if (date) query.date = date;
       if (client_id) query.client_id = client_id;
       if (employee_id) query.employee_ids = employee_id;
@@ -19,15 +20,21 @@ const scheduleController = {
 
       let schedules = await Schedule.find(query).sort({ date: 1, start_time: 1 });
 
+      // Enriquece com dados de cliente e funcionários
       const enriched = await Promise.all(schedules.map(async (s) => {
         const client = await Client.findById(s.client_id);
         const employees = await Employee.find({ _id: { $in: s.employee_ids } });
+
         return {
           ...s.toObject(),
           client_name: client ? client.name : 'N/A',
           client_phone: client ? client.phone : '',
           employee_names: employees.map(e => e.name),
-          employee_details: employees.map(e => ({ id: e._id, name: e.name, role: e.role }))
+          employee_details: employees.map(e => ({
+            id: e._id,
+            name: e.name,
+            role: e.role
+          }))
         };
       }));
 
@@ -53,25 +60,35 @@ const scheduleController = {
 
       // Verificar duplicidade
       const duplicate = await Schedule.findOne({
-        client_id, date, start_time,
+        client_id,
+        date,
+        start_time,
         address: address || '',
         status: { $in: ['pendente', 'confirmado', 'em_andamento'] }
       });
 
       if (duplicate) {
-        return res.status(409).json({ 
-          error: 'Já existe um agendamento para este cliente na mesma data, horário e endereço' 
+        return res.status(409).json({
+          error: 'Já existe um agendamento para este cliente na mesma data, horário e endereço'
         });
       }
 
+      // Criar agendamento
       const schedule = await Schedule.create({
-        client_id, employee_ids, date, start_time, end_time,
-        service, address: address || '', notes: notes || '',
-        status: 'pendente', created_by: req.user.id
+        client_id,
+        employee_ids,
+        date,
+        start_time,
+        end_time,
+        service,
+        address: address || '',
+        notes: notes || '',
+        status: 'pendente',
+        created_by: req.user.id
       });
 
+      // Registrar no histórico
       const client = await Client.findById(client_id);
-
       await History.create({
         schedule_id: schedule._id,
         user_id: req.user.id,
@@ -90,7 +107,10 @@ const scheduleController = {
   // Criar recorrência
   async createRecurring(req, res) {
     try {
-      const { client_id, employee_ids, start_date, end_date, frequency, days_of_week, start_time, end_time, service, address, notes } = req.body;
+      const {
+        client_id, employee_ids, start_date, end_date,
+        frequency, days_of_week, start_time, end_time, service, address, notes
+      } = req.body;
 
       if (!client_id || !start_date || !end_date || !frequency || !days_of_week || !start_time || !end_time || !service) {
         return res.status(400).json({ error: 'Campos obrigatórios faltando' });
@@ -100,24 +120,33 @@ const scheduleController = {
         return res.status(400).json({ error: 'Pelo menos um funcionário é necessário' });
       }
 
+      // Gerar datas
       const generatedDates = generateRecurringDates(start_date, end_date, frequency, days_of_week);
-      
+
       if (generatedDates.length === 0) {
-        return res.status(400).json({ error: 'Nenhuma data gerada' });
+        return res.status(400).json({ error: 'Nenhuma data gerada. Verifique o período e dias selecionados.' });
       }
 
+      // Criar todos os agendamentos
       const createdSchedules = [];
       for (const date of generatedDates) {
         const schedule = await Schedule.create({
-          client_id, employee_ids, date, start_time, end_time,
-          service, address: address || '', notes: notes || '',
-          status: 'pendente', created_by: req.user.id
+          client_id,
+          employee_ids,
+          date,
+          start_time,
+          end_time,
+          service,
+          address: address || '',
+          notes: notes || '',
+          status: 'pendente',
+          created_by: req.user.id
         });
         createdSchedules.push(schedule);
       }
 
+      // Registrar no histórico
       const client = await Client.findById(client_id);
-
       await History.create({
         user_id: req.user.id,
         action: 'criou_recorrencia',
@@ -125,9 +154,9 @@ const scheduleController = {
         timestamp: new Date()
       });
 
-      return res.status(201).json({ 
-        schedules: createdSchedules, 
-        total_generated: createdSchedules.length 
+      return res.status(201).json({
+        schedules: createdSchedules,
+        total_generated: createdSchedules.length
       });
     } catch (error) {
       console.error('Erro ao criar recorrência:', error);
@@ -140,7 +169,7 @@ const scheduleController = {
     try {
       const { status } = req.body;
       const validStatuses = [
-        'pendente', 'confirmado', 'em_andamento', 'concluido', 
+        'pendente', 'confirmado', 'em_andamento', 'concluido',
         'concluido_ressalva', 'cancelado_cliente', 'funcionario_faltou'
       ];
 
@@ -149,12 +178,15 @@ const scheduleController = {
       }
 
       const schedule = await Schedule.findById(req.params.id);
-      if (!schedule) return res.status(404).json({ error: 'Agendamento não encontrado' });
+      if (!schedule) {
+        return res.status(404).json({ error: 'Agendamento não encontrado' });
+      }
 
       const oldStatus = schedule.status;
       schedule.status = status;
       await schedule.save();
 
+      // Registrar no histórico
       await History.create({
         schedule_id: schedule._id,
         user_id: req.user.id,
@@ -164,6 +196,7 @@ const scheduleController = {
         timestamp: new Date()
       });
 
+      // Criar confirmação se concluído
       if (['concluido', 'concluido_ressalva'].includes(status)) {
         await Confirmation.create({
           schedule_id: schedule._id,
@@ -198,7 +231,7 @@ const scheduleController = {
       let updatedCount = 0;
 
       for (const schedule of schedules) {
-        schedule.employee_ids = schedule.employee_ids.map(id => 
+        schedule.employee_ids = schedule.employee_ids.map(id =>
           id.toString() === old_employee_id.toString() ? new_employee_id : id
         );
         await schedule.save();
@@ -213,9 +246,9 @@ const scheduleController = {
         timestamp: new Date()
       });
 
-      return res.json({ 
+      return res.json({
         message: 'Substituição realizada com sucesso',
-        updated_schedules: updatedCount 
+        updated_schedules: updatedCount
       });
     } catch (error) {
       console.error('Erro ao substituir:', error);
@@ -233,7 +266,9 @@ const scheduleController = {
       }
 
       const client = await Client.findById(client_id);
-      if (!client) return res.status(404).json({ error: 'Cliente não encontrado' });
+      if (!client) {
+        return res.status(404).json({ error: 'Cliente não encontrado' });
+      }
 
       const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
       const endDate = `${year}-${String(month).padStart(2, '0')}-31`;
@@ -262,6 +297,7 @@ const scheduleController = {
       const schedulesDetailed = await Promise.all(schedules.map(async (s) => {
         const employees = await Employee.find({ _id: { $in: s.employee_ids } });
         const scheduleDate = new Date(s.date + 'T00:00:00');
+
         return {
           date: s.date,
           weekday: weekdays[scheduleDate.getDay()] || '',
@@ -275,6 +311,7 @@ const scheduleController = {
         };
       }));
 
+      // Gerar CSV
       const csvHeader = 'Data,Dia,Horário,Serviço,Endereço,Funcionários,Status';
       const csvRows = schedulesDetailed.map(s => {
         const formattedDate = s.date.split('-').reverse().join('/');
@@ -299,7 +336,9 @@ const scheduleController = {
   async getById(req, res) {
     try {
       const schedule = await Schedule.findById(req.params.id);
-      if (!schedule) return res.status(404).json({ error: 'Agendamento não encontrado' });
+      if (!schedule) {
+        return res.status(404).json({ error: 'Agendamento não encontrado' });
+      }
 
       const client = await Client.findById(schedule.client_id);
       const employees = await Employee.find({ _id: { $in: schedule.employee_ids } });
@@ -317,8 +356,22 @@ const scheduleController = {
   // Atualizar agendamento
   async update(req, res) {
     try {
-      const schedule = await Schedule.findByIdAndUpdate(req.params.id, req.body, { new: true });
-      if (!schedule) return res.status(404).json({ error: 'Agendamento não encontrado' });
+      const { date, start_time, end_time, service, address, notes, employee_ids } = req.body;
+      const updateData = {};
+
+      if (date) updateData.date = date;
+      if (start_time) updateData.start_time = start_time;
+      if (end_time) updateData.end_time = end_time;
+      if (service) updateData.service = service;
+      if (address !== undefined) updateData.address = address;
+      if (notes !== undefined) updateData.notes = notes;
+      if (employee_ids) updateData.employee_ids = employee_ids;
+
+      const schedule = await Schedule.findByIdAndUpdate(req.params.id, updateData, { new: true });
+
+      if (!schedule) {
+        return res.status(404).json({ error: 'Agendamento não encontrado' });
+      }
 
       await History.create({
         schedule_id: schedule._id,
@@ -338,7 +391,10 @@ const scheduleController = {
   async remove(req, res) {
     try {
       const schedule = await Schedule.findByIdAndDelete(req.params.id);
-      if (!schedule) return res.status(404).json({ error: 'Agendamento não encontrado' });
+
+      if (!schedule) {
+        return res.status(404).json({ error: 'Agendamento não encontrado' });
+      }
 
       const client = await Client.findById(schedule.client_id);
       const clientName = client ? client.name : 'Cliente desconhecido';
@@ -356,6 +412,34 @@ const scheduleController = {
     } catch (error) {
       return res.status(500).json({ error: error.message });
     }
+  },
+
+  // Excluir em lote por cliente
+  async removeByClient(req, res) {
+    try {
+      const { client_id } = req.params;
+
+      const result = await Schedule.deleteMany({
+        client_id,
+        status: { $in: ['pendente', 'confirmado', 'em_andamento'] }
+      });
+
+      await History.create({
+        user_id: req.user.id,
+        action: 'removeu_agendamentos_lote',
+        old_value: `Cliente ID: ${client_id}`,
+        new_value: `${result.deletedCount} agendamentos excluídos`,
+        timestamp: new Date()
+      });
+
+      return res.json({
+        message: `${result.deletedCount} agendamentos excluídos com sucesso`,
+        deleted_count: result.deletedCount
+      });
+    } catch (error) {
+      console.error('Erro ao excluir em lote:', error);
+      return res.status(500).json({ error: error.message });
+    }
   }
 };
 
@@ -364,15 +448,17 @@ function generateRecurringDates(startDate, endDate, frequency, daysOfWeek) {
   const dates = [];
   const start = new Date(startDate + 'T00:00:00');
   const end = new Date(endDate + 'T23:59:59');
-  
+
   const dayMap = {
     'Dom': 0, 'Seg': 1, 'Ter': 2, 'Qua': 3,
     'Qui': 4, 'Sex': 5, 'Sab': 6,
     'Segunda': 1, 'Terça': 2, 'Quarta': 3,
     'Quinta': 4, 'Sexta': 5, 'Sábado': 6, 'Domingo': 0
   };
-  
-  const targetDays = daysOfWeek.map(d => dayMap[d] !== undefined ? dayMap[d] : parseInt(d));
+
+  const targetDays = daysOfWeek.map(d =>
+    dayMap[d] !== undefined ? dayMap[d] : parseInt(d)
+  );
 
   if (frequency === 'semanal') {
     let current = new Date(start);

@@ -11,16 +11,17 @@ const {
   getReport,
   getById,
   update,
-  remove
+  remove,
+  removeByClient
 } = require('../controllers/scheduleController');
 
 router.use(authMiddleware);
-
 router.get('/', list);
 router.get('/report', getReport);
 router.post('/', roleMiddleware('admin', 'supervisor'), create);
 router.post('/recurring', roleMiddleware('admin', 'supervisor'), createRecurring);
 router.post('/replace-employee', roleMiddleware('admin', 'supervisor'), replaceEmployee);
+router.delete('/client/:client_id', roleMiddleware('admin', 'supervisor'), removeByClient);
 router.get('/:id', getById);
 router.put('/:id', roleMiddleware('admin', 'supervisor'), update);
 router.delete('/:id', roleMiddleware('admin'), remove);
