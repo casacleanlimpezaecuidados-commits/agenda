@@ -17,6 +17,7 @@ import {
   AlertTriangle,
   Briefcase,
   Clock,
+  RefreshCw,
 } from 'lucide-react';
 
 export default function Employees() {
@@ -48,16 +49,19 @@ export default function Employees() {
   const typeLabels = {
     clt: 'CLT',
     diarista: 'Diarista',
+    folguista: 'Folguista',
   };
 
   const typeColors = {
     clt: 'bg-blue-100 text-blue-700 border-blue-200',
     diarista: 'bg-orange-100 text-orange-700 border-orange-200',
+    folguista: 'bg-green-100 text-green-700 border-green-200',
   };
 
   const typeIcons = {
     clt: Briefcase,
     diarista: Clock,
+    folguista: RefreshCw,
   };
 
   useEffect(() => {
@@ -207,29 +211,35 @@ export default function Employees() {
       </div>
 
       {/* Cards de resumo */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <div className="card-premium p-5 bg-gradient-to-br from-primary-50 to-white">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center"><Users className="w-6 h-6 text-primary-800" /></div>
-            <div><p className="text-2xl font-bold text-gray-900">{employees.length}</p><p className="text-sm text-gray-500">Total</p></div>
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+        <div className="card-premium p-4 bg-gradient-to-br from-primary-50 to-white">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center"><Users className="w-5 h-5 text-primary-800" /></div>
+            <div><p className="text-xl font-bold text-gray-900">{employees.length}</p><p className="text-xs text-gray-500">Total</p></div>
           </div>
         </div>
-        <div className="card-premium p-5 bg-gradient-to-br from-success/5 to-white">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-success-light rounded-xl flex items-center justify-center"><CheckCircle2 className="w-6 h-6 text-success" /></div>
-            <div><p className="text-2xl font-bold text-gray-900">{employees.filter(e => e.active).length}</p><p className="text-sm text-gray-500">Ativos</p></div>
+        <div className="card-premium p-4 bg-gradient-to-br from-success/5 to-white">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-success-light rounded-xl flex items-center justify-center"><CheckCircle2 className="w-5 h-5 text-success" /></div>
+            <div><p className="text-xl font-bold text-gray-900">{employees.filter(e => e.active).length}</p><p className="text-xs text-gray-500">Ativos</p></div>
           </div>
         </div>
-        <div className="card-premium p-5 bg-gradient-to-br from-blue-50 to-white">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center"><Briefcase className="w-6 h-6 text-blue-700" /></div>
-            <div><p className="text-2xl font-bold text-gray-900">{employees.filter(e => e.type === 'clt').length}</p><p className="text-sm text-gray-500">CLT</p></div>
+        <div className="card-premium p-4 bg-gradient-to-br from-blue-50 to-white">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center"><Briefcase className="w-5 h-5 text-blue-700" /></div>
+            <div><p className="text-xl font-bold text-gray-900">{employees.filter(e => e.type === 'clt').length}</p><p className="text-xs text-gray-500">CLT</p></div>
           </div>
         </div>
-        <div className="card-premium p-5 bg-gradient-to-br from-orange-50 to-white">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center"><Clock className="w-6 h-6 text-orange-700" /></div>
-            <div><p className="text-2xl font-bold text-gray-900">{employees.filter(e => e.type === 'diarista').length}</p><p className="text-sm text-gray-500">Diaristas</p></div>
+        <div className="card-premium p-4 bg-gradient-to-br from-orange-50 to-white">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center"><Clock className="w-5 h-5 text-orange-700" /></div>
+            <div><p className="text-xl font-bold text-gray-900">{employees.filter(e => e.type === 'diarista').length}</p><p className="text-xs text-gray-500">Diaristas</p></div>
+          </div>
+        </div>
+        <div className="card-premium p-4 bg-gradient-to-br from-green-50 to-white">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center"><RefreshCw className="w-5 h-5 text-green-700" /></div>
+            <div><p className="text-xl font-bold text-gray-900">{employees.filter(e => e.type === 'folguista').length}</p><p className="text-xs text-gray-500">Folguistas</p></div>
           </div>
         </div>
       </div>
@@ -396,6 +406,7 @@ export default function Employees() {
                 <select value={form.type} onChange={(e) => setForm({...form, type: e.target.value})} className="select-premium" required>
                   <option value="clt">CLT (Fixo)</option>
                   <option value="diarista">Diarista</option>
+                  <option value="folguista">Folguista</option>
                 </select>
               </div>
               <div className="flex gap-3 pt-4 border-t">
