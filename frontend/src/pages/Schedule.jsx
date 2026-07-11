@@ -522,24 +522,24 @@ export default function Schedule() {
       )}
 
       {/* ========== HEADER CORRIGIDO ========== */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div className="flex-shrink-0">
+      <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
+        <div className="flex-shrink-0 min-w-0">
           <h1 className="text-3xl font-bold text-gray-900">Agenda</h1>
-          <p className="text-gray-500 mt-1">Gerencie todos os agendamentos da sua equipe</p>
+          <p className="text-gray-500 mt-1 text-sm md:text-base">Gerencie todos os agendamentos da sua equipe</p>
         </div>
-        <div className="flex items-center gap-3 flex-nowrap">
-          <button onClick={() => setShowNewModal(true)} className="btn-primary flex items-center gap-2 h-11 whitespace-nowrap">
+        <div className="flex items-center gap-2 flex-nowrap overflow-x-auto">
+          <button onClick={() => setShowNewModal(true)} className="btn-primary flex items-center gap-1.5 h-10 px-3 whitespace-nowrap text-sm">
             <Plus className="w-4 h-4 flex-shrink-0" /> <span>Novo Agendamento</span>
           </button>
-          <button onClick={() => setShowRecurringModal(true)} className="btn-success flex items-center gap-2 h-11 whitespace-nowrap">
+          <button onClick={() => setShowRecurringModal(true)} className="btn-success flex items-center gap-1.5 h-10 px-3 whitespace-nowrap text-sm">
             <Repeat className="w-4 h-4 flex-shrink-0" /> <span>Agenda Recorrente</span>
           </button>
           <button onClick={() => { setSelectedClientAddresses([]); setReplaceData({ client_id: '', address: '', old_employee_id: '', new_employee_id: '' }); setShowReplaceModal(true); }} 
-            className="bg-warning text-white px-4 h-11 rounded-xl font-medium hover:bg-amber-600 shadow-soft flex items-center gap-2 whitespace-nowrap transition-all duration-200">
+            className="bg-warning text-white px-3 h-10 rounded-xl text-sm font-medium hover:bg-amber-600 shadow-soft flex items-center gap-1.5 whitespace-nowrap transition-all duration-200">
             <UserCheck className="w-4 h-4 flex-shrink-0" /> <span>Substituir Func.</span>
           </button>
           <button onClick={() => setShowDeleteLoteModal(true)} 
-            className="bg-danger text-white px-4 h-11 rounded-xl font-medium hover:bg-red-600 shadow-soft flex items-center gap-2 whitespace-nowrap transition-all duration-200">
+            className="bg-danger text-white px-3 h-10 rounded-xl text-sm font-medium hover:bg-red-600 shadow-soft flex items-center gap-1.5 whitespace-nowrap transition-all duration-200">
             <Trash2 className="w-4 h-4 flex-shrink-0" /> <span>Excluir em Lote</span>
           </button>
         </div>
