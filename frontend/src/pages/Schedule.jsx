@@ -522,25 +522,25 @@ export default function Schedule() {
       )}
 
       {/* ========== HEADER CORRIGIDO ========== */}
-      <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
-        <div className="flex-shrink-0 min-w-0">
+      <div className="space-y-4">
+        <div>
           <h1 className="text-3xl font-bold text-gray-900">Agenda</h1>
-          <p className="text-gray-500 mt-1 text-sm md:text-base">Gerencie todos os agendamentos da sua equipe</p>
+          <p className="text-gray-500 mt-1">Gerencie todos os agendamentos da sua equipe</p>
         </div>
-        <div className="flex items-center gap-2 flex-nowrap overflow-x-auto">
-          <button onClick={() => setShowNewModal(true)} className="btn-primary flex items-center gap-1.5 h-10 px-3 whitespace-nowrap text-sm">
-            <Plus className="w-4 h-4 flex-shrink-0" /> <span>Novo Agendamento</span>
+        <div className="flex items-center gap-2 flex-wrap">
+          <button onClick={() => setShowNewModal(true)} className="btn-primary flex items-center gap-2 h-10 whitespace-nowrap">
+            <Plus className="w-4 h-4 flex-shrink-0" /> Novo Agendamento
           </button>
-          <button onClick={() => setShowRecurringModal(true)} className="btn-success flex items-center gap-1.5 h-10 px-3 whitespace-nowrap text-sm">
-            <Repeat className="w-4 h-4 flex-shrink-0" /> <span>Agenda Recorrente</span>
+          <button onClick={() => setShowRecurringModal(true)} className="btn-success flex items-center gap-2 h-10 whitespace-nowrap">
+            <Repeat className="w-4 h-4 flex-shrink-0" /> Agenda Recorrente
           </button>
           <button onClick={() => { setSelectedClientAddresses([]); setReplaceData({ client_id: '', address: '', old_employee_id: '', new_employee_id: '' }); setShowReplaceModal(true); }} 
-            className="bg-warning text-white px-3 h-10 rounded-xl text-sm font-medium hover:bg-amber-600 shadow-soft flex items-center gap-1.5 whitespace-nowrap transition-all duration-200">
-            <UserCheck className="w-4 h-4 flex-shrink-0" /> <span>Substituir Func.</span>
+            className="bg-warning text-white px-4 h-10 rounded-xl font-medium hover:bg-amber-600 shadow-soft flex items-center gap-2 whitespace-nowrap transition-all duration-200">
+            <UserCheck className="w-4 h-4 flex-shrink-0" /> Substituir Func.
           </button>
           <button onClick={() => setShowDeleteLoteModal(true)} 
-            className="bg-danger text-white px-3 h-10 rounded-xl text-sm font-medium hover:bg-red-600 shadow-soft flex items-center gap-1.5 whitespace-nowrap transition-all duration-200">
-            <Trash2 className="w-4 h-4 flex-shrink-0" /> <span>Excluir em Lote</span>
+            className="bg-danger text-white px-4 h-10 rounded-xl font-medium hover:bg-red-600 shadow-soft flex items-center gap-2 whitespace-nowrap transition-all duration-200">
+            <Trash2 className="w-4 h-4 flex-shrink-0" /> Excluir em Lote
           </button>
         </div>
       </div>
