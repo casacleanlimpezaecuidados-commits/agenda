@@ -15,6 +15,8 @@ import {
   X,
   CalendarCheck,
   AlertTriangle,
+  Briefcase,
+  Clock,
 } from 'lucide-react';
 
 export default function Employees() {
@@ -34,12 +36,28 @@ export default function Employees() {
     phone: '',
     email: '',
     role: 'auxiliar',
+    type: 'clt',
   });
 
   const roleLabels = {
     admin: 'Administrador',
     supervisor: 'Supervisor',
     auxiliar: 'Auxiliar',
+  };
+
+  const typeLabels = {
+    clt: 'CLT',
+    diarista: 'Diarista',
+  };
+
+  const typeColors = {
+    clt: 'bg-blue-100 text-blue-700 border-blue-200',
+    diarista: 'bg-orange-100 text-orange-700 border-orange-200',
+  };
+
+  const typeIcons = {
+    clt: Briefcase,
+    diarista: Clock,
   };
 
   useEffect(() => {
@@ -82,7 +100,7 @@ export default function Employees() {
 
   const handleSelectEmployee = (employee) => {
     setSelectedEmployee(employee);
-    loadEmployeeSchedule(employee.id);
+    loadEmployeeSchedule(employee._id);
   };
 
   // Criar/Editar funcionário
@@ -92,7 +110,7 @@ export default function Employees() {
 
     try {
       if (editingEmployee) {
-        await api.put(`/employees/${editingEmployee.id}`, form);
+        await api.put(`/employees/${editingEmployee._id}`, form);
         showNotification('✅ Funcionário atualizado!');
       } else {
         await api.post('/employees', form);
@@ -116,6 +134,7 @@ export default function Employees() {
       phone: employee.phone || '',
       email: employee.email || '',
       role: employee.role || 'auxiliar',
+      type: employee.type || 'clt',
     });
     setShowModal(true);
   };
@@ -123,7 +142,7 @@ export default function Employees() {
   const handleDelete = async (employee) => {
     if (confirm(`Desativar funcionário "${employee.name}"?`)) {
       try {
-        await api.delete(`/employees/${employee.id}`);
+        await api.delete(`/employees/${employee._id}`);
         loadEmployees();
         setSelectedEmployee(null);
         showNotification('✅ Funcionário desativado!');
@@ -134,7 +153,7 @@ export default function Employees() {
   };
 
   const resetForm = () => {
-    setForm({ name: '', phone: '', email: '', role: 'auxiliar' });
+    setForm({ name: '', phone: '', email: '', role: 'auxiliar', type: 'clt' });
     setEditingEmployee(null);
   };
 
@@ -188,7 +207,7 @@ export default function Employees() {
       </div>
 
       {/* Cards de resumo */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div className="card-premium p-5 bg-gradient-to-br from-primary-50 to-white">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center"><Users className="w-6 h-6 text-primary-800" /></div>
@@ -201,10 +220,16 @@ export default function Employees() {
             <div><p className="text-2xl font-bold text-gray-900">{employees.filter(e => e.active).length}</p><p className="text-sm text-gray-500">Ativos</p></div>
           </div>
         </div>
-        <div className="card-premium p-5 bg-gradient-to-br from-info/5 to-white">
+        <div className="card-premium p-5 bg-gradient-to-br from-blue-50 to-white">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-info-light rounded-xl flex items-center justify-center"><TrendingUp className="w-6 h-6 text-info" /></div>
-            <div><p className="text-2xl font-bold text-gray-900">{employees.reduce((acc, e) => acc + (e.today_schedules || 0), 0)}</p><p className="text-sm text-gray-500">Atend. Hoje</p></div>
+            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center"><Briefcase className="w-6 h-6 text-blue-700" /></div>
+            <div><p className="text-2xl font-bold text-gray-900">{employees.filter(e => e.type === 'clt').length}</p><p className="text-sm text-gray-500">CLT</p></div>
+          </div>
+        </div>
+        <div className="card-premium p-5 bg-gradient-to-br from-orange-50 to-white">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center"><Clock className="w-6 h-6 text-orange-700" /></div>
+            <div><p className="text-2xl font-bold text-gray-900">{employees.filter(e => e.type === 'diarista').length}</p><p className="text-sm text-gray-500">Diaristas</p></div>
           </div>
         </div>
       </div>
@@ -228,37 +253,44 @@ export default function Employees() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {employees.map((employee, index) => (
-                <div key={employee.id} onClick={() => handleSelectEmployee(employee)}
-                  className={`card-premium p-5 cursor-pointer group hover:shadow-medium transform hover:-translate-y-0.5 transition-all duration-200 ${
-                    selectedEmployee?.id === employee.id ? 'ring-2 ring-light shadow-medium' : ''
-                  }`} style={{ animationDelay: `${index * 50}ms` }}>
-                  <div className="flex items-start gap-4">
-                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br from-primary-800 to-light text-white font-bold text-lg flex-shrink-0 shadow-lg">
-                      {getInitials(employee.name)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-gray-900 truncate group-hover:text-primary-800 transition-colors">{employee.name}</h3>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${getRoleColor(employee.role)}`}>
-                          {roleLabels[employee.role] || employee.role}
-                        </span>
-                        <span className="text-xs text-gray-500 flex items-center gap-1"><Phone className="w-3 h-3" />{employee.phone}</span>
+              {employees.map((employee, index) => {
+                const TypeIcon = typeIcons[employee.type] || Briefcase;
+                return (
+                  <div key={employee._id} onClick={() => handleSelectEmployee(employee)}
+                    className={`card-premium p-5 cursor-pointer group hover:shadow-medium transform hover:-translate-y-0.5 transition-all duration-200 ${
+                      selectedEmployee?._id === employee._id ? 'ring-2 ring-light shadow-medium' : ''
+                    }`} style={{ animationDelay: `${index * 50}ms` }}>
+                    <div className="flex items-start gap-4">
+                      <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br from-primary-800 to-light text-white font-bold text-lg flex-shrink-0 shadow-lg">
+                        {getInitials(employee.name)}
                       </div>
-                      <div className="flex items-center gap-4 mt-3 pt-3 border-t border-gray-50">
-                        <div className="text-center"><p className="text-lg font-bold text-gray-900">{employee.total_schedules || 0}</p><p className="text-xs text-gray-500">Total mês</p></div>
-                        <div className="text-center"><p className="text-lg font-bold text-success">{employee.today_schedules || 0}</p><p className="text-xs text-gray-500">Hoje</p></div>
-                        <div className="flex gap-1 ml-auto">
-                          <button onClick={(e) => { e.stopPropagation(); handleEdit(employee); }}
-                            className="p-1.5 hover:bg-gray-100 rounded-lg" title="Editar"><Edit3 className="w-4 h-4 text-gray-400" /></button>
-                          <button onClick={(e) => { e.stopPropagation(); handleDelete(employee); }}
-                            className="p-1.5 hover:bg-red-50 rounded-lg" title="Desativar"><Trash2 className="w-4 h-4 text-gray-400 hover:text-danger" /></button>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-gray-900 truncate group-hover:text-primary-800 transition-colors">{employee.name}</h3>
+                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${getRoleColor(employee.role)}`}>
+                            {roleLabels[employee.role] || employee.role}
+                          </span>
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium border ${typeColors[employee.type] || 'bg-gray-100 text-gray-600'}`}>
+                            <TypeIcon className="w-3 h-3 inline mr-0.5" />
+                            {typeLabels[employee.type] || employee.type}
+                          </span>
+                          <span className="text-xs text-gray-500 flex items-center gap-1"><Phone className="w-3 h-3" />{employee.phone}</span>
+                        </div>
+                        <div className="flex items-center gap-4 mt-3 pt-3 border-t border-gray-50">
+                          <div className="text-center"><p className="text-lg font-bold text-gray-900">{employee.total_schedules || 0}</p><p className="text-xs text-gray-500">Total mês</p></div>
+                          <div className="text-center"><p className="text-lg font-bold text-success">{employee.today_schedules || 0}</p><p className="text-xs text-gray-500">Hoje</p></div>
+                          <div className="flex gap-1 ml-auto">
+                            <button onClick={(e) => { e.stopPropagation(); handleEdit(employee); }}
+                              className="p-1.5 hover:bg-gray-100 rounded-lg" title="Editar"><Edit3 className="w-4 h-4 text-gray-400" /></button>
+                            <button onClick={(e) => { e.stopPropagation(); handleDelete(employee); }}
+                              className="p-1.5 hover:bg-red-50 rounded-lg" title="Desativar"><Trash2 className="w-4 h-4 text-gray-400 hover:text-danger" /></button>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -271,9 +303,14 @@ export default function Employees() {
                 {getInitials(selectedEmployee.name)}
               </div>
               <h3 className="text-lg font-bold text-gray-900">{selectedEmployee.name}</h3>
-              <span className={`text-xs px-2 py-0.5 rounded-full font-medium mt-1 inline-block ${getRoleColor(selectedEmployee.role)}`}>
-                {roleLabels[selectedEmployee.role] || selectedEmployee.role}
-              </span>
+              <div className="flex items-center justify-center gap-2 mt-2">
+                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${getRoleColor(selectedEmployee.role)}`}>
+                  {roleLabels[selectedEmployee.role] || selectedEmployee.role}
+                </span>
+                <span className={`text-xs px-2 py-0.5 rounded-full font-medium border ${typeColors[selectedEmployee.type] || 'bg-gray-100 text-gray-600'}`}>
+                  {typeLabels[selectedEmployee.type] || selectedEmployee.type}
+                </span>
+              </div>
             </div>
 
             <div className="space-y-3 mb-6">
@@ -354,6 +391,13 @@ export default function Employees() {
                   <option value="admin">Administrador</option>
                 </select>
               </div>
+              <div>
+                <label className="label-premium">Tipo de Contrato *</label>
+                <select value={form.type} onChange={(e) => setForm({...form, type: e.target.value})} className="select-premium" required>
+                  <option value="clt">CLT (Fixo)</option>
+                  <option value="diarista">Diarista</option>
+                </select>
+              </div>
               <div className="flex gap-3 pt-4 border-t">
                 <button type="button" onClick={() => { setShowModal(false); resetForm(); }} className="btn-secondary flex-1">Cancelar</button>
                 <button type="submit" disabled={saving} className="btn-primary flex-1">{saving ? 'Salvando...' : 'Salvar'}</button>
@@ -364,4 +408,4 @@ export default function Employees() {
       )}
     </div>
   );
-}// Atualizado: Bot�o Novo Funcion�rio 
+}

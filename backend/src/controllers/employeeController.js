@@ -3,7 +3,7 @@ const { Schedule, Client, Employee, History, Confirmation } = require('../config
 const employeeController = {
   async list(req, res) {
     try {
-      const { search, active, role } = req.query;
+      const { search, active, role, type } = req.query;
       let query = {};
 
       if (search) {
@@ -16,6 +16,7 @@ const employeeController = {
       if (active !== undefined) query.active = active === 'true';
       else query.active = true;
       if (role) query.role = role;
+      if (type) query.type = type;
 
       let employees = await Employee.find(query).sort({ created_at: -1 });
 
@@ -26,7 +27,11 @@ const employeeController = {
           employee_ids: emp._id,
           date: new Date().toISOString().split('T')[0]
         });
-        return { ...emp.toObject(), total_schedules: totalSchedules, today_schedules: todaySchedules };
+        return { 
+          ...emp.toObject(), 
+          total_schedules: totalSchedules, 
+          today_schedules: todaySchedules 
+        };
       }));
 
       return res.json(enriched);
@@ -40,12 +45,20 @@ const employeeController = {
       const { name, phone } = req.body;
       if (!name || !phone) return res.status(400).json({ error: 'Nome e telefone obrigatórios' });
 
-      const employee = await Employee.create(req.body);
+      // Criar com todos os campos incluindo type
+      const employee = await Employee.create({
+        name: req.body.name,
+        phone: req.body.phone,
+        email: req.body.email || '',
+        role: req.body.role || 'auxiliar',
+        type: req.body.type || 'clt',
+        active: true
+      });
 
       await History.create({
         user_id: req.user.id,
         action: 'criou_funcionario',
-        new_value: `Funcionário: ${employee.name}`,
+        new_value: `Funcionário: ${employee.name} (${employee.type === 'clt' ? 'CLT' : 'Diarista'})`,
         timestamp: new Date()
       });
 
@@ -69,7 +82,13 @@ const employeeController = {
 
   async update(req, res) {
     try {
-      const employee = await Employee.findByIdAndUpdate(req.params.id, req.body, { new: true });
+      // Garantir que o type seja enviado na atualização
+      const updateData = { ...req.body };
+      if (updateData.type && !['clt', 'diarista'].includes(updateData.type)) {
+        delete updateData.type;
+      }
+
+      const employee = await Employee.findByIdAndUpdate(req.params.id, updateData, { new: true });
       if (!employee) return res.status(404).json({ error: 'Funcionário não encontrado' });
       return res.json(employee);
     } catch (error) {

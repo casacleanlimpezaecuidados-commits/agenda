@@ -54,6 +54,7 @@ const employeeSchema = new mongoose.Schema({
   phone: String,
   email: String,
   role: { type: String, default: 'auxiliar' },
+  type: { type: String, default: 'clt', enum: ['clt', 'diarista'] },
   active: { type: Boolean, default: true },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now }
