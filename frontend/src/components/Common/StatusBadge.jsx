@@ -21,7 +21,7 @@ const statusConfig = {
   em_andamento: {
     label: 'Em Andamento',
     icon: PlayCircle,
-    className: 'badge-info',
+    className: 'badge-info animate-pulse',
   },
   concluido: {
     label: 'Concluído',
