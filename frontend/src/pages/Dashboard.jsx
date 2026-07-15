@@ -5,22 +5,9 @@ import api from '../services/api';
 import StatsCard from '../components/Dashboard/StatsCard';
 import StatusBadge from '../components/Common/StatusBadge';
 import {
-  CalendarCheck,
-  CheckCircle2,
-  PlayCircle,
-  Clock,
-  Users,
-  Plus,
-  UserPlus,
-  Building2,
-  BarChart3,
-  RefreshCw,
-  UserCheck,
-  ChevronRight,
-  MapPin,
-  Phone,
-  ArrowUpRight,
-  History,
+  CalendarCheck, CheckCircle2, PlayCircle, Clock, Users,
+  Plus, UserPlus, Building2, BarChart3, RefreshCw,
+  MapPin, Phone, ArrowUpRight, History, Trash2,
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -29,9 +16,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  useEffect(() => {
-    loadDashboard();
-  }, []);
+  useEffect(() => { loadDashboard(); }, []);
 
   const loadDashboard = async () => {
     try {
@@ -39,8 +24,30 @@ export default function Dashboard() {
       setDashboardData(response.data);
     } catch (error) {
       console.error('Erro ao carregar dashboard:', error);
-    } finally {
-      setLoading(false);
+    } finally { setLoading(false); }
+  };
+
+  const handleStatusChange = async (schedule) => {
+    const statuses = ['pendente', 'confirmado', 'em_andamento', 'concluido', 'concluido_ressalva', 'cancelado_cliente', 'funcionario_faltou'];
+    const newStatus = prompt(`Alterar status do agendamento:\n\nAtual: ${schedule.status}\n\nOpções: ${statuses.join(', ')}`);
+    if (newStatus && statuses.includes(newStatus)) {
+      try {
+        await api.patch(`/schedules/${schedule._id}/status`, { status: newStatus });
+        loadDashboard();
+      } catch (error) {
+        alert('Erro ao alterar status');
+      }
+    }
+  };
+
+  const handleDeleteSchedule = async (schedule) => {
+    if (confirm(`Excluir agendamento de ${schedule.client_name}?`)) {
+      try {
+        await api.delete(`/schedules/${schedule._id}`);
+        loadDashboard();
+      } catch (error) {
+        alert('Erro ao excluir');
+      }
     }
   };
 
@@ -61,34 +68,10 @@ export default function Dashboard() {
   const upcomingSchedules = dashboardData?.upcoming_schedules || [];
 
   const quickActions = [
-    { 
-      label: 'Novo Agendamento', 
-      icon: Plus, 
-      color: 'bg-primary-800 hover:bg-primary-900',
-      path: '/schedule',
-      roles: ['admin', 'supervisor']
-    },
-    { 
-      label: 'Novo Cliente', 
-      icon: Building2, 
-      color: 'bg-success hover:bg-emerald-600',
-      path: '/clients',
-      roles: ['admin', 'supervisor']
-    },
-    { 
-      label: 'Novo Funcionário', 
-      icon: UserPlus, 
-      color: 'bg-info hover:bg-blue-600',
-      path: '/employees',
-      roles: ['admin']
-    },
-    { 
-      label: 'Relatórios', 
-      icon: BarChart3, 
-      color: 'bg-warning hover:bg-amber-600',
-      path: '/reports',
-      roles: ['admin', 'supervisor']
-    },
+    { label: 'Novo Agendamento', icon: Plus, color: 'bg-primary-800 hover:bg-primary-900', path: '/schedule', roles: ['admin', 'supervisor'] },
+    { label: 'Novo Cliente', icon: Building2, color: 'bg-success hover:bg-emerald-600', path: '/clients', roles: ['admin', 'supervisor'] },
+    { label: 'Novo Funcionário', icon: UserPlus, color: 'bg-info hover:bg-blue-600', path: '/employees', roles: ['admin'] },
+    { label: 'Relatórios', icon: BarChart3, color: 'bg-warning hover:bg-amber-600', path: '/reports', roles: ['admin', 'supervisor'] },
   ];
 
   return (
@@ -101,12 +84,8 @@ export default function Dashboard() {
             Resumo operacional de {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })}
           </p>
         </div>
-        <button
-          onClick={loadDashboard}
-          className="btn-secondary flex items-center gap-1.5 text-sm py-2"
-        >
-          <RefreshCw className="w-3.5 h-3.5" />
-          Atualizar
+        <button onClick={loadDashboard} className="btn-secondary flex items-center gap-1.5 text-sm py-2">
+          <RefreshCw className="w-3.5 h-3.5" /> Atualizar
         </button>
       </div>
 
@@ -119,79 +98,85 @@ export default function Dashboard() {
         <StatsCard title="Funcionários Ativos" value={stats.active_employees || 0} icon={Users} color="primary" />
       </div>
 
-      {/* Grid Principal */}
-      <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
+      {/* Layout Principal: Agenda (100%) + Painéis na direita */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         
-        {/* Coluna Esquerda - 70% */}
-        <div className="lg:col-span-7 space-y-6">
-          
-          {/* Agenda de Hoje */}
+        {/* AGENDA DE HOJE - OCUPA 75% */}
+        <div className="lg:col-span-3">
           <div className="card-premium overflow-hidden">
             <div className="p-5 border-b border-gray-100">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-lg font-bold text-gray-900">Agenda de Hoje</h2>
-                  <p className="text-sm text-gray-500 mt-0.5">
-                    {todaySchedules.length} atendimentos programados
-                  </p>
+                  <p className="text-sm text-gray-500 mt-0.5">{todaySchedules.length} atendimentos programados</p>
                 </div>
                 <button onClick={() => navigate('/schedule')} className="text-sm text-primary-800 hover:text-primary-900 font-medium flex items-center gap-1">
                   Ver agenda completa <ArrowUpRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
-
             <div className="overflow-x-auto">
               {todaySchedules.length > 0 ? (
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-gray-50 bg-gray-50/50">
-                      <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[120px]">Horário</th>
-                      <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Cliente</th>
-                      <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Funcionários</th>
-                      <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">Endereço</th>
-                      <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Serviço</th>
-                      <th className="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[120px]">Status</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Horário</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Cliente</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase hidden md:table-cell">Funcionários</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase hidden lg:table-cell">Endereço</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Serviço</th>
+                      <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Status</th>
+                      <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase w-[80px]">Ações</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
                     {todaySchedules.map((schedule, index) => (
-                      <tr key={schedule._id || index} className="group hover:bg-gray-50/50 transition-colors cursor-pointer" onClick={() => navigate('/schedule')}>
-                        <td className="px-5 py-3.5">
-                          <span className="text-sm font-semibold text-gray-900">
-                            {schedule.start_time} - {schedule.end_time}
-                          </span>
+                      <tr key={schedule._id || index} className="group hover:bg-gray-50/50 transition-colors">
+                        <td className="px-4 py-3">
+                          <span className="text-sm font-semibold text-gray-900">{schedule.start_time} - {schedule.end_time}</span>
                         </td>
-                        <td className="px-5 py-3.5">
+                        <td className="px-4 py-3">
                           <div>
                             <p className="text-sm font-medium text-gray-900">{schedule.client_name || 'N/A'}</p>
                             <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
-                              <Phone className="w-3 h-3" /> {schedule.client_phone || 'N/A'}
+                              <Phone className="w-3 h-3" /> {schedule.client_phone || ''}
                             </p>
                           </div>
                         </td>
-                        <td className="px-5 py-3.5 hidden md:table-cell">
+                        <td className="px-4 py-3 hidden md:table-cell">
                           <div className="flex flex-wrap gap-1">
                             {schedule.employee_names?.length > 0 ? (
                               schedule.employee_names.map((emp, i) => (
                                 <span key={i} className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">{emp}</span>
                               ))
                             ) : (
-                              <span className="text-xs text-gray-400">Não informado</span>
+                              <span className="text-xs text-gray-400">-</span>
                             )}
                           </div>
                         </td>
-                        <td className="px-5 py-3.5 hidden lg:table-cell">
+                        <td className="px-4 py-3 hidden lg:table-cell">
                           <p className="text-sm text-gray-600 flex items-start gap-1.5">
                             <MapPin className="w-3.5 h-3.5 text-gray-400 flex-shrink-0 mt-0.5" />
                             <span className="line-clamp-2">{schedule.address || 'Sem endereço'}</span>
                           </p>
                         </td>
-                        <td className="px-5 py-3.5">
+                        <td className="px-4 py-3">
                           <span className="text-sm text-gray-700">{schedule.service || 'N/A'}</span>
                         </td>
-                        <td className="px-5 py-3.5 text-center">
+                        <td className="px-4 py-3 text-center">
                           <StatusBadge status={schedule.status} />
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <div className="flex items-center justify-center gap-1">
+                            <button onClick={(e) => { e.stopPropagation(); handleStatusChange(schedule); }}
+                              className="p-1.5 hover:bg-gray-100 rounded-lg" title="Alterar status">
+                              <RefreshCw className="w-3.5 h-3.5 text-gray-400 hover:text-primary-600" />
+                            </button>
+                            <button onClick={(e) => { e.stopPropagation(); handleDeleteSchedule(schedule); }}
+                              className="p-1.5 hover:bg-gray-100 rounded-lg" title="Excluir">
+                              <Trash2 className="w-3.5 h-3.5 text-gray-400 hover:text-danger" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -209,11 +194,11 @@ export default function Dashboard() {
 
           {/* Próximos Agendamentos */}
           {upcomingSchedules.length > 0 && (
-            <div className="card-premium p-5">
+            <div className="card-premium p-5 mt-6">
               <h2 className="text-base font-bold text-gray-900 mb-4">Próximos Agendamentos</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {upcomingSchedules.map((schedule, index) => (
-                  <div key={index} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer group border border-gray-100">
+                  <div key={index} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer border border-gray-100">
                     <div className="w-10 h-10 bg-primary-50 rounded-xl flex items-center justify-center flex-shrink-0">
                       <CalendarCheck className="w-5 h-5 text-primary-800" />
                     </div>
@@ -223,7 +208,6 @@ export default function Dashboard() {
                         {new Date(schedule.date).toLocaleDateString('pt-BR')} • {schedule.start_time} - {schedule.end_time}
                       </p>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-colors flex-shrink-0" />
                   </div>
                 ))}
               </div>
@@ -231,7 +215,7 @@ export default function Dashboard() {
           )}
 
           {/* Ações Rápidas */}
-          <div className="card-premium p-5">
+          <div className="card-premium p-5 mt-6">
             <h2 className="text-base font-bold text-gray-900 mb-4">Ações Rápidas</h2>
             <div className="grid grid-cols-4 gap-3">
               {quickActions.map((action, index) => {
@@ -249,9 +233,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Coluna Direita - 30% */}
-        <div className="lg:col-span-3 space-y-5">
-          
+        {/* COLUNA DIREITA - 25% */}
+        <div className="lg:col-span-1 space-y-5">
           {/* Alterações Recentes */}
           <div className="card-premium p-5">
             <h2 className="text-base font-bold text-gray-900 mb-4">Alterações Recentes</h2>
@@ -274,7 +257,7 @@ export default function Dashboard() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8">
+              <div className="text-center py-4">
                 <History className="w-8 h-8 text-gray-300 mx-auto mb-2" />
                 <p className="text-xs text-gray-500">Nenhuma alteração</p>
               </div>
@@ -292,16 +275,13 @@ export default function Dashboard() {
                 </div>
                 <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden flex">
                   {dashboardData.month_summary.concluidos > 0 && (
-                    <div className="h-full bg-success transition-all duration-500"
-                      style={{ width: `${(dashboardData.month_summary.concluidos / Math.max(dashboardData.month_summary.total, 1)) * 100}%` }} />
+                    <div className="h-full bg-success" style={{ width: `${(dashboardData.month_summary.concluidos / Math.max(dashboardData.month_summary.total, 1)) * 100}%` }} />
                   )}
                   {dashboardData.month_summary.pendentes > 0 && (
-                    <div className="h-full bg-warning transition-all duration-500"
-                      style={{ width: `${(dashboardData.month_summary.pendentes / Math.max(dashboardData.month_summary.total, 1)) * 100}%` }} />
+                    <div className="h-full bg-warning" style={{ width: `${(dashboardData.month_summary.pendentes / Math.max(dashboardData.month_summary.total, 1)) * 100}%` }} />
                   )}
                   {dashboardData.month_summary.cancelados > 0 && (
-                    <div className="h-full bg-danger transition-all duration-500"
-                      style={{ width: `${(dashboardData.month_summary.cancelados / Math.max(dashboardData.month_summary.total, 1)) * 100}%` }} />
+                    <div className="h-full bg-danger" style={{ width: `${(dashboardData.month_summary.cancelados / Math.max(dashboardData.month_summary.total, 1)) * 100}%` }} />
                   )}
                 </div>
                 <div className="grid grid-cols-3 gap-3 pt-2">
