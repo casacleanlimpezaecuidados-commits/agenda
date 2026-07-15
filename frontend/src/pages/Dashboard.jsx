@@ -110,42 +110,16 @@ export default function Dashboard() {
         </button>
       </div>
 
-      {/* Cards KPI - 5 cards em linha com mesma altura */}
+      {/* Cards KPI */}
       <div className="grid grid-cols-5 gap-4">
-        <StatsCard
-          title="Atendimentos Hoje"
-          value={stats.total_hoje || 0}
-          icon={CalendarCheck}
-          color="primary"
-          onClick={() => navigate('/schedule')}
-        />
-        <StatsCard
-          title="Confirmados"
-          value={stats.confirmados || 0}
-          icon={CheckCircle2}
-          color="success"
-        />
-        <StatsCard
-          title="Em Andamento"
-          value={stats.em_andamento || 0}
-          icon={PlayCircle}
-          color="info"
-        />
-        <StatsCard
-          title="Pendentes"
-          value={stats.pendentes || 0}
-          icon={Clock}
-          color="warning"
-        />
-        <StatsCard
-          title="Funcionários Ativos"
-          value={stats.active_employees || 0}
-          icon={Users}
-          color="primary"
-        />
+        <StatsCard title="Atendimentos Hoje" value={stats.total_hoje || 0} icon={CalendarCheck} color="primary" onClick={() => navigate('/schedule')} />
+        <StatsCard title="Confirmados" value={stats.confirmados || 0} icon={CheckCircle2} color="success" />
+        <StatsCard title="Em Andamento" value={stats.em_andamento || 0} icon={PlayCircle} color="info" />
+        <StatsCard title="Pendentes" value={stats.pendentes || 0} icon={Clock} color="warning" />
+        <StatsCard title="Funcionários Ativos" value={stats.active_employees || 0} icon={Users} color="primary" />
       </div>
 
-      {/* Grid Principal - 70% / 30% */}
+      {/* Grid Principal */}
       <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
         
         {/* Coluna Esquerda - 70% */}
@@ -161,12 +135,8 @@ export default function Dashboard() {
                     {todaySchedules.length} atendimentos programados
                   </p>
                 </div>
-                <button
-                  onClick={() => navigate('/schedule')}
-                  className="text-sm text-primary-800 hover:text-primary-900 font-medium flex items-center gap-1"
-                >
-                  Ver agenda completa
-                  <ArrowUpRight className="w-4 h-4" />
+                <button onClick={() => navigate('/schedule')} className="text-sm text-primary-800 hover:text-primary-900 font-medium flex items-center gap-1">
+                  Ver agenda completa <ArrowUpRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -176,66 +146,49 @@ export default function Dashboard() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-gray-50 bg-gray-50/50">
-                      <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[100px]">
-                        Horário
-                      </th>
-                      <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        Cliente
-                      </th>
-                      <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">
-                        Funcionários
-                      </th>
-                      <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">
-                        Endereço
-                      </th>
-                      <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        Serviço
-                      </th>
-                      <th className="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[120px]">
-                        Status
-                      </th>
+                      <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[120px]">Horário</th>
+                      <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Cliente</th>
+                      <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Funcionários</th>
+                      <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">Endereço</th>
+                      <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Serviço</th>
+                      <th className="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[120px]">Status</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
                     {todaySchedules.map((schedule, index) => (
-                      <tr 
-                        key={schedule.id || index}
-                        className="group hover:bg-gray-50/50 transition-colors cursor-pointer"
-                        onClick={() => navigate('/schedule')}
-                      >
+                      <tr key={schedule._id || index} className="group hover:bg-gray-50/50 transition-colors cursor-pointer" onClick={() => navigate('/schedule')}>
                         <td className="px-5 py-3.5">
                           <span className="text-sm font-semibold text-gray-900">
-                            {schedule.time}
+                            {schedule.start_time} - {schedule.end_time}
                           </span>
                         </td>
                         <td className="px-5 py-3.5">
                           <div>
-                            <p className="text-sm font-medium text-gray-900">
-                              {schedule.client_name}
-                            </p>
+                            <p className="text-sm font-medium text-gray-900">{schedule.client_name || 'N/A'}</p>
                             <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
-                              <Phone className="w-3 h-3" />
-                              {schedule.client_phone}
+                              <Phone className="w-3 h-3" /> {schedule.client_phone || 'N/A'}
                             </p>
                           </div>
                         </td>
                         <td className="px-5 py-3.5 hidden md:table-cell">
                           <div className="flex flex-wrap gap-1">
-                            {schedule.employees?.map((emp, i) => (
-                              <span key={i} className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">
-                                {emp}
-                              </span>
-                            ))}
+                            {schedule.employee_names?.length > 0 ? (
+                              schedule.employee_names.map((emp, i) => (
+                                <span key={i} className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">{emp}</span>
+                              ))
+                            ) : (
+                              <span className="text-xs text-gray-400">Não informado</span>
+                            )}
                           </div>
                         </td>
                         <td className="px-5 py-3.5 hidden lg:table-cell">
                           <p className="text-sm text-gray-600 flex items-start gap-1.5">
                             <MapPin className="w-3.5 h-3.5 text-gray-400 flex-shrink-0 mt-0.5" />
-                            <span className="line-clamp-2">{schedule.address}</span>
+                            <span className="line-clamp-2">{schedule.address || 'Sem endereço'}</span>
                           </p>
                         </td>
                         <td className="px-5 py-3.5">
-                          <span className="text-sm text-gray-700">{schedule.service}</span>
+                          <span className="text-sm text-gray-700">{schedule.service || 'N/A'}</span>
                         </td>
                         <td className="px-5 py-3.5 text-center">
                           <StatusBadge status={schedule.status} />
@@ -260,19 +213,14 @@ export default function Dashboard() {
               <h2 className="text-base font-bold text-gray-900 mb-4">Próximos Agendamentos</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {upcomingSchedules.map((schedule, index) => (
-                  <div 
-                    key={index}
-                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer group border border-gray-100"
-                  >
+                  <div key={index} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer group border border-gray-100">
                     <div className="w-10 h-10 bg-primary-50 rounded-xl flex items-center justify-center flex-shrink-0">
                       <CalendarCheck className="w-5 h-5 text-primary-800" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {schedule.client_name}
-                      </p>
+                      <p className="text-sm font-medium text-gray-900 truncate">{schedule.client_name}</p>
                       <p className="text-xs text-gray-500">
-                        {new Date(schedule.date).toLocaleDateString('pt-BR')} • {schedule.time}
+                        {new Date(schedule.date).toLocaleDateString('pt-BR')} • {schedule.start_time} - {schedule.end_time}
                       </p>
                     </div>
                     <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-colors flex-shrink-0" />
@@ -282,24 +230,16 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* Ações Rápidas - AGORA LOGO ABAIXO DA AGENDA */}
+          {/* Ações Rápidas */}
           <div className="card-premium p-5">
             <h2 className="text-base font-bold text-gray-900 mb-4">Ações Rápidas</h2>
             <div className="grid grid-cols-4 gap-3">
               {quickActions.map((action, index) => {
                 if (action.roles && !action.roles.includes(user?.role)) return null;
-                
                 const Icon = action.icon;
                 return (
-                  <button
-                    key={index}
-                    onClick={() => navigate(action.path)}
-                    className={`
-                      ${action.color} text-white p-4 rounded-xl
-                      flex flex-col items-center gap-2.5 transition-all duration-200
-                      hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]
-                    `}
-                  >
+                  <button key={index} onClick={() => navigate(action.path)}
+                    className={`${action.color} text-white p-4 rounded-xl flex flex-col items-center gap-2.5 transition-all duration-200 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]`}>
                     <Icon className="w-7 h-7" />
                     <span className="text-xs font-medium text-center leading-tight">{action.label}</span>
                   </button>
@@ -315,26 +255,20 @@ export default function Dashboard() {
           {/* Alterações Recentes */}
           <div className="card-premium p-5">
             <h2 className="text-base font-bold text-gray-900 mb-4">Alterações Recentes</h2>
-            
             {recentHistory.length > 0 ? (
               <div className="space-y-0">
                 {recentHistory.slice(0, 6).map((item, index) => (
-                  <div key={item.id || index} className="relative pl-5 pb-3.5 last:pb-0">
+                  <div key={item._id || index} className="relative pl-5 pb-3.5 last:pb-0">
                     {index < Math.min(recentHistory.length, 6) - 1 && (
                       <div className="absolute left-[5px] top-2.5 bottom-0 w-px bg-gray-200" />
                     )}
-                    
                     <div className="absolute left-0 top-1.5 w-2.5 h-2.5 rounded-full border-2 border-light bg-white" />
-                    
                     <div>
                       <p className="text-xs text-gray-900">
-                        <span className="font-medium">{item.user_name}</span>
-                        {' '}
-                        <span className="text-gray-600">{item.action.replace(/_/g, ' ')}</span>
+                        <span className="font-medium">{item.user_name}</span>{' '}
+                        <span className="text-gray-600">{item.action?.replace(/_/g, ' ')}</span>
                       </p>
-                      <p className="text-[11px] text-gray-400 mt-0.5">
-                        {item.time_ago}
-                      </p>
+                      <p className="text-[11px] text-gray-400 mt-0.5">{item.time_ago}</p>
                     </div>
                   </div>
                 ))}
@@ -351,62 +285,29 @@ export default function Dashboard() {
           {dashboardData?.month_summary && (
             <div className="card-premium p-5">
               <h2 className="text-base font-bold text-gray-900 mb-4">Resumo do Mês</h2>
-              
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Total de atendimentos</span>
-                  <span className="text-lg font-bold text-gray-900">
-                    {dashboardData.month_summary.total}
-                  </span>
+                  <span className="text-lg font-bold text-gray-900">{dashboardData.month_summary.total}</span>
                 </div>
-                
-                {/* Barra de progresso */}
                 <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden flex">
                   {dashboardData.month_summary.concluidos > 0 && (
-                    <div 
-                      className="h-full bg-success transition-all duration-500"
-                      style={{ 
-                        width: `${(dashboardData.month_summary.concluidos / Math.max(dashboardData.month_summary.total, 1)) * 100}%` 
-                      }}
-                    />
+                    <div className="h-full bg-success transition-all duration-500"
+                      style={{ width: `${(dashboardData.month_summary.concluidos / Math.max(dashboardData.month_summary.total, 1)) * 100}%` }} />
                   )}
                   {dashboardData.month_summary.pendentes > 0 && (
-                    <div 
-                      className="h-full bg-warning transition-all duration-500"
-                      style={{ 
-                        width: `${(dashboardData.month_summary.pendentes / Math.max(dashboardData.month_summary.total, 1)) * 100}%` 
-                      }}
-                    />
+                    <div className="h-full bg-warning transition-all duration-500"
+                      style={{ width: `${(dashboardData.month_summary.pendentes / Math.max(dashboardData.month_summary.total, 1)) * 100}%` }} />
                   )}
                   {dashboardData.month_summary.cancelados > 0 && (
-                    <div 
-                      className="h-full bg-danger transition-all duration-500"
-                      style={{ 
-                        width: `${(dashboardData.month_summary.cancelados / Math.max(dashboardData.month_summary.total, 1)) * 100}%` 
-                      }}
-                    />
+                    <div className="h-full bg-danger transition-all duration-500"
+                      style={{ width: `${(dashboardData.month_summary.cancelados / Math.max(dashboardData.month_summary.total, 1)) * 100}%` }} />
                   )}
                 </div>
-
                 <div className="grid grid-cols-3 gap-3 pt-2">
-                  <div className="text-center">
-                    <p className="text-base font-bold text-success">
-                      {dashboardData.month_summary.concluidos}
-                    </p>
-                    <p className="text-[11px] text-gray-500">Concluídos</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-base font-bold text-warning">
-                      {dashboardData.month_summary.pendentes}
-                    </p>
-                    <p className="text-[11px] text-gray-500">Pendentes</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-base font-bold text-danger">
-                      {dashboardData.month_summary.cancelados}
-                    </p>
-                    <p className="text-[11px] text-gray-500">Cancelados</p>
-                  </div>
+                  <div className="text-center"><p className="text-base font-bold text-success">{dashboardData.month_summary.concluidos}</p><p className="text-[11px] text-gray-500">Concluídos</p></div>
+                  <div className="text-center"><p className="text-base font-bold text-warning">{dashboardData.month_summary.pendentes}</p><p className="text-[11px] text-gray-500">Pendentes</p></div>
+                  <div className="text-center"><p className="text-base font-bold text-danger">{dashboardData.month_summary.cancelados}</p><p className="text-[11px] text-gray-500">Cancelados</p></div>
                 </div>
               </div>
             </div>
@@ -416,9 +317,7 @@ export default function Dashboard() {
           <div className="card-premium p-5">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-base font-bold text-gray-900">Confirmações Hoje</h2>
-              <span className="text-2xl font-bold text-success">
-                {dashboardData?.today_confirmations || 0}
-              </span>
+              <span className="text-2xl font-bold text-success">{dashboardData?.today_confirmations || 0}</span>
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <CheckCircle2 className="w-4 h-4 text-success" />
