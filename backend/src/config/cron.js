@@ -3,10 +3,9 @@ const { Schedule, History } = require('./database');
 
 function startAutoCloseCron() {
   
-  // ========== CRON 1: INICIAR AGENDAMENTOS DO DIA (07:00) ==========
-  // Muda pendente/confirmado → em_andamento
-  cron.schedule('0 7 * * *', async () => {
-    console.log('🕐 [CRON 07:00] Iniciando agendamentos do dia...');
+  // ========== CRON 1: INICIAR (10:00 UTC = 07:00 Brasil) ==========
+  cron.schedule('0 10 * * *', async () => {
+    console.log('🕐 [CRON 07:00 BRT] Iniciando agendamentos do dia...');
     
     try {
       const today = new Date().toISOString().split('T')[0];
@@ -16,14 +15,8 @@ function startAutoCloseCron() {
         status: { $in: ['pendente', 'confirmado'] }
       });
 
-      if (schedulesToStart.length === 0) {
-        console.log(`📅 Nenhum agendamento para iniciar em ${today}`);
-        return;
-      }
-
       let count = 0;
       for (const schedule of schedulesToStart) {
-        const oldStatus = schedule.status;
         schedule.status = 'em_andamento';
         await schedule.save();
         count++;
@@ -32,22 +25,21 @@ function startAutoCloseCron() {
           schedule_id: schedule._id,
           user_id: null,
           action: 'inicio_automatico',
-          old_value: oldStatus,
+          old_value: schedule.status === 'em_andamento' ? 'pendente' : schedule.status,
           new_value: 'em_andamento',
           timestamp: new Date()
         });
       }
 
-      console.log(`✅ [CRON 07:00] ${count} agendamentos iniciados automaticamente`);
+      console.log(`✅ [CRON 07:00] ${count} agendamentos iniciados`);
     } catch (error) {
       console.error('❌ [CRON 07:00] Erro:', error.message);
     }
   });
 
-  // ========== CRON 2: FECHAR AGENDAMENTOS DO DIA (18:01) ==========
-  // Muda em_andamento → concluido (só se não foi alterado manualmente)
-  cron.schedule('1 18 * * *', async () => {
-    console.log('🕐 [CRON 18:01] Fechando agendamentos do dia...');
+  // ========== CRON 2: FECHAR (21:01 UTC = 18:01 Brasil) ==========
+  cron.schedule('1 21 * * *', async () => {
+    console.log('🕐 [CRON 18:01 BRT] Fechando agendamentos do dia...');
     
     try {
       const today = new Date().toISOString().split('T')[0];
@@ -56,11 +48,6 @@ function startAutoCloseCron() {
         date: today,
         status: 'em_andamento'
       });
-
-      if (schedulesToClose.length === 0) {
-        console.log(`📅 Nenhum agendamento em andamento para fechar em ${today}`);
-        return;
-      }
 
       let count = 0;
       for (const schedule of schedulesToClose) {
@@ -80,15 +67,15 @@ function startAutoCloseCron() {
         });
       }
 
-      console.log(`✅ [CRON 18:01] ${count} agendamentos fechados automaticamente`);
+      console.log(`✅ [CRON 18:01] ${count} agendamentos fechados`);
     } catch (error) {
       console.error('❌ [CRON 18:01] Erro:', error.message);
     }
   });
 
-  console.log('⏰ Cron jobs configurados:');
-  console.log('   - Início automático: Todo dia às 07:00 (pendente/confirmado → em_andamento)');
-  console.log('   - Fechamento automático: Todo dia às 18:01 (em_andamento → concluído)');
+  console.log('⏰ Cron jobs configurados (horário Brasil):');
+  console.log('   - Início automático: 07:00 (pendente/confirmado → em_andamento)');
+  console.log('   - Fechamento automático: 18:01 (em_andamento → concluído)');
 }
 
 module.exports = { startAutoCloseCron };
