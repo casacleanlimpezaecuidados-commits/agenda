@@ -7,7 +7,7 @@ import StatusBadge from '../components/Common/StatusBadge';
 import {
   CalendarCheck, CheckCircle2, PlayCircle, Clock, Users,
   Plus, UserPlus, Building2, BarChart3, RefreshCw,
-  MapPin, Phone, ArrowUpRight, History, Trash2,
+  MapPin, Phone, ArrowUpRight, History,
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -25,30 +25,6 @@ export default function Dashboard() {
     } catch (error) {
       console.error('Erro ao carregar dashboard:', error);
     } finally { setLoading(false); }
-  };
-
-  const handleStatusChange = async (schedule) => {
-    const statuses = ['pendente', 'confirmado', 'em_andamento', 'concluido', 'concluido_ressalva', 'cancelado_cliente', 'funcionario_faltou'];
-    const newStatus = prompt(`Alterar status do agendamento:\n\nAtual: ${schedule.status}\n\nOpções: ${statuses.join(', ')}`);
-    if (newStatus && statuses.includes(newStatus)) {
-      try {
-        await api.patch(`/schedules/${schedule._id}/status`, { status: newStatus });
-        loadDashboard();
-      } catch (error) {
-        alert('Erro ao alterar status');
-      }
-    }
-  };
-
-  const handleDeleteSchedule = async (schedule) => {
-    if (confirm(`Excluir agendamento de ${schedule.client_name}?`)) {
-      try {
-        await api.delete(`/schedules/${schedule._id}`);
-        loadDashboard();
-      } catch (error) {
-        alert('Erro ao excluir');
-      }
-    }
   };
 
   if (loading) {
@@ -90,7 +66,7 @@ export default function Dashboard() {
       </div>
 
       {/* Cards KPI */}
-      <div className="grid grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
         <StatsCard title="Atendimentos Hoje" value={stats.total_hoje || 0} icon={CalendarCheck} color="primary" onClick={() => navigate('/schedule')} />
         <StatsCard title="Confirmados" value={stats.confirmados || 0} icon={CheckCircle2} color="success" />
         <StatsCard title="Em Andamento" value={stats.em_andamento || 0} icon={PlayCircle} color="info" />
@@ -98,10 +74,10 @@ export default function Dashboard() {
         <StatsCard title="Funcionários Ativos" value={stats.active_employees || 0} icon={Users} color="primary" />
       </div>
 
-      {/* Layout Principal: Agenda (100%) + Painéis na direita */}
+      {/* Layout Principal */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         
-        {/* AGENDA DE HOJE - OCUPA 75% */}
+        {/* AGENDA DE HOJE - 75% */}
         <div className="lg:col-span-3">
           <div className="card-premium overflow-hidden">
             <div className="p-5 border-b border-gray-100">
@@ -126,12 +102,11 @@ export default function Dashboard() {
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase hidden lg:table-cell">Endereço</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Serviço</th>
                       <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Status</th>
-                      <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase w-[80px]">Ações</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
                     {todaySchedules.map((schedule, index) => (
-                      <tr key={schedule._id || index} className="group hover:bg-gray-50/50 transition-colors">
+                      <tr key={schedule._id || index} className="group hover:bg-gray-50/50 transition-colors cursor-pointer" onClick={() => navigate('/schedule')}>
                         <td className="px-4 py-3">
                           <span className="text-sm font-semibold text-gray-900">{schedule.start_time} - {schedule.end_time}</span>
                         </td>
@@ -147,7 +122,13 @@ export default function Dashboard() {
                           <div className="flex flex-wrap gap-1">
                             {schedule.employee_names?.length > 0 ? (
                               schedule.employee_names.map((emp, i) => (
-                                <span key={i} className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">{emp}</span>
+                                <span key={i} className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                                  schedule.status === 'em_andamento' 
+                                    ? 'bg-info-light text-info animate-pulse' 
+                                    : 'bg-gray-100 text-gray-700'
+                                }`}>
+                                  {emp}
+                                </span>
                               ))
                             ) : (
                               <span className="text-xs text-gray-400">-</span>
@@ -165,18 +146,6 @@ export default function Dashboard() {
                         </td>
                         <td className="px-4 py-3 text-center">
                           <StatusBadge status={schedule.status} />
-                        </td>
-                        <td className="px-4 py-3 text-center">
-                          <div className="flex items-center justify-center gap-1">
-                            <button onClick={(e) => { e.stopPropagation(); handleStatusChange(schedule); }}
-                              className="p-1.5 hover:bg-gray-100 rounded-lg" title="Alterar status">
-                              <RefreshCw className="w-3.5 h-3.5 text-gray-400 hover:text-primary-600" />
-                            </button>
-                            <button onClick={(e) => { e.stopPropagation(); handleDeleteSchedule(schedule); }}
-                              className="p-1.5 hover:bg-gray-100 rounded-lg" title="Excluir">
-                              <Trash2 className="w-3.5 h-3.5 text-gray-400 hover:text-danger" />
-                            </button>
-                          </div>
                         </td>
                       </tr>
                     ))}
@@ -217,7 +186,7 @@ export default function Dashboard() {
           {/* Ações Rápidas */}
           <div className="card-premium p-5 mt-6">
             <h2 className="text-base font-bold text-gray-900 mb-4">Ações Rápidas</h2>
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {quickActions.map((action, index) => {
                 if (action.roles && !action.roles.includes(user?.role)) return null;
                 const Icon = action.icon;
