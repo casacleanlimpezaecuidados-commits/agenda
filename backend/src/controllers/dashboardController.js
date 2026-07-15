@@ -7,9 +7,36 @@ const dashboardController = {
       const currentMonth = new Date().getMonth() + 1;
       const currentYear = new Date().getFullYear();
 
-      const todaySchedules = await Schedule.find({ date: today });
+      // Buscar agendamentos de hoje
+      const todaySchedulesRaw = await Schedule.find({ date: today });
+      
+      // ENRIQUECER com dados de cliente e funcionários
+      const todaySchedules = await Promise.all(todaySchedulesRaw.map(async (s) => {
+        const client = await Client.findById(s.client_id);
+        const employees = await Employee.find({ _id: { $in: s.employee_ids } });
+        return {
+          ...s.toObject(),
+          client_name: client ? client.name : 'N/A',
+          client_phone: client ? client.phone : '',
+          employee_names: employees.map(e => e.name),
+          employee_details: employees.map(e => ({ id: e._id, name: e.name, role: e.role }))
+        };
+      }));
+
       const activeEmployees = await Employee.countDocuments({ active: true });
-      const recentHistory = await History.find().sort({ timestamp: -1 }).limit(10);
+      
+      // Histórico enriquecido
+      const recentHistoryRaw = await History.find().sort({ timestamp: -1 }).limit(10);
+      const { User } = require('../config/database');
+      const recentHistory = await Promise.all(recentHistoryRaw.map(async (h) => {
+        const user = h.user_id ? await User.findById(h.user_id) : null;
+        return {
+          ...h.toObject(),
+          user_name: user ? user.name : 'Sistema',
+          time_ago: getTimeAgo(h.timestamp)
+        };
+      }));
+
       const todayConfirmations = await Confirmation.countDocuments({
         confirmed_at: { $gte: today + 'T00:00:00', $lte: today + 'T23:59:59' }
       });
@@ -51,5 +78,17 @@ const dashboardController = {
     }
   }
 };
+
+function getTimeAgo(timestamp) {
+  const seconds = Math.floor((new Date() - new Date(timestamp)) / 1000);
+  if (seconds < 60) return 'agora mesmo';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} min atrás`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h atrás`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d atrás`;
+  return new Date(timestamp).toLocaleDateString('pt-BR');
+}
 
 module.exports = dashboardController;
