@@ -13,15 +13,15 @@ import {
   MapPin,
   Users,
   Phone,
-  Filter,
   X,
   RefreshCw,
   Trash2,
   Edit3,
   Building2,
-  Navigation,
   CheckCircle2,
   AlertTriangle,
+  CheckSquare,
+  Square,
 } from 'lucide-react';
 
 const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -80,6 +80,9 @@ export default function Schedule() {
   const [deleteLoteClientId, setDeleteLoteClientId] = useState('');
   const [selectedClientAddresses, setSelectedClientAddresses] = useState([]);
   const [editingSchedule, setEditingSchedule] = useState(null);
+  const [selectedSchedules, setSelectedSchedules] = useState([]);
+  const [showBulkStatusModal, setShowBulkStatusModal] = useState(false);
+  const [bulkStatus, setBulkStatus] = useState('');
 
   const [formData, setFormData] = useState({
     client_id: '',
@@ -143,6 +146,7 @@ export default function Schedule() {
         params: { month: currentMonth + 1, year: currentYear }
       });
       setSchedules(response.data);
+      setSelectedSchedules([]);
     } catch (error) {
       console.error('Erro ao carregar agenda:', error);
     } finally {
@@ -457,6 +461,44 @@ export default function Schedule() {
     }
   };
 
+  const toggleSelectSchedule = (scheduleId) => {
+    const ids = [...selectedSchedules];
+    if (ids.includes(scheduleId)) {
+      setSelectedSchedules(ids.filter(id => id !== scheduleId));
+    } else {
+      setSelectedSchedules([...ids, scheduleId]);
+    }
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedSchedules.length === filteredSchedules.length && filteredSchedules.length > 0) {
+      setSelectedSchedules([]);
+    } else {
+      setSelectedSchedules(filteredSchedules.map(s => s._id));
+    }
+  };
+
+  const handleBulkStatusChange = async (e) => {
+    e.preventDefault();
+    if (!bulkStatus || selectedSchedules.length === 0) return;
+    setSaving(true);
+    try {
+      for (const id of selectedSchedules) {
+        await api.patch(`/schedules/${id}/status`, { status: bulkStatus });
+      }
+      setShowBulkStatusModal(false);
+      setBulkStatus('');
+      setSelectedSchedules([]);
+      await loadSchedules();
+      const label = STATUS_OPTIONS.find(s => s.value === bulkStatus)?.label || bulkStatus;
+      showNotification(`✅ ${selectedSchedules.length} agendamentos atualizados para "${label}"!`);
+    } catch (error) {
+      showNotification('❌ Erro: ' + (error.response?.data?.error || error.message), 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const getDaysInMonth = () => {
     const year = currentYear;
     const month = currentMonth;
@@ -542,6 +584,12 @@ export default function Schedule() {
             className="bg-danger text-white px-4 h-10 rounded-xl font-medium hover:bg-red-600 shadow-soft flex items-center gap-2 whitespace-nowrap transition-all duration-200">
             <Trash2 className="w-4 h-4 flex-shrink-0" /> Excluir em Lote
           </button>
+          {selectedSchedules.length > 0 && (
+            <button onClick={() => setShowBulkStatusModal(true)} 
+              className="bg-purple-600 text-white px-4 h-10 rounded-xl font-medium hover:bg-purple-700 shadow-soft flex items-center gap-2 whitespace-nowrap transition-all duration-200">
+              <CheckCircle2 className="w-4 h-4 flex-shrink-0" /> Atualizar ({selectedSchedules.length})
+            </button>
+          )}
         </div>
       </div>
       {/* ========== FIM HEADER CORRIGIDO ========== */}
@@ -595,8 +643,16 @@ export default function Schedule() {
       )}
       {(viewMode === 'week' || viewMode === 'day') && (
         <div className="card-premium p-6">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-4">
             <h3 className="text-lg font-bold text-gray-900">{viewMode === 'week' ? 'Agendamentos da Semana' : `Agendamentos do dia ${selectedDate?.day || today.getDate()}`}</h3>
+            {filteredSchedules.length > 0 && (
+              <button onClick={toggleSelectAll} className="text-xs text-primary-800 hover:text-primary-900 font-medium flex items-center gap-1">
+                {selectedSchedules.length === filteredSchedules.length ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
+                {selectedSchedules.length === filteredSchedules.length ? 'Desmarcar Todos' : 'Selecionar Todos'}
+              </button>
+            )}
+          </div>
+          <div className="flex items-center justify-between mb-4">
             <button onClick={loadSchedules} className="btn-secondary flex items-center gap-1.5 text-sm py-1.5"><RefreshCw className="w-3.5 h-3.5" /> Atualizar</button>
           </div>
           {loading ? (
@@ -604,9 +660,16 @@ export default function Schedule() {
           ) : filteredSchedules.length > 0 ? (
             <div className="space-y-3">
               {filteredSchedules.map((schedule, idx) => (
-                <div key={idx} className="p-4 border border-gray-100 rounded-xl hover:shadow-soft transition-all">
+                <div key={idx} className={`p-4 border rounded-xl hover:shadow-soft transition-all ${selectedSchedules.includes(schedule._id) ? 'border-purple-400 bg-purple-50/30' : 'border-gray-100'}`}>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
+                      <input 
+                        type="checkbox" 
+                        checked={selectedSchedules.includes(schedule._id)} 
+                        onChange={() => toggleSelectSchedule(schedule._id)} 
+                        onClick={(e) => e.stopPropagation()} 
+                        className="rounded w-4 h-4 text-purple-600 focus:ring-purple-500" 
+                      />
                       <div className="w-10 h-10 bg-primary-50 rounded-xl flex items-center justify-center"><Clock className="w-5 h-5 text-primary-800" /></div>
                       <div><p className="font-semibold text-gray-900">{schedule.client_name}</p><p className="text-sm text-gray-500">{schedule.date ? new Date(schedule.date + 'T00:00:00').toLocaleDateString('pt-BR') : ''} • {schedule.start_time} - {schedule.end_time}</p></div>
                     </div>
@@ -618,7 +681,7 @@ export default function Schedule() {
                       <button onClick={() => handleDeleteSchedule(schedule._id, schedule.client_name)} className="p-1.5 hover:bg-gray-100 rounded-lg" title="Excluir"><Trash2 className="w-4 h-4 text-gray-400 hover:text-danger" /></button>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm ml-12">
                     <div className="flex items-center gap-2 text-gray-600"><Building2 className="w-4 h-4 text-gray-400" /><span>{schedule.service}</span></div>
                     <div className="flex items-center gap-2 text-gray-600"><MapPin className="w-4 h-4 text-gray-400" /><span className="truncate">{schedule.address || 'Sem endereço'}</span></div>
                     <div className="flex items-center gap-2 text-gray-600"><Users className="w-4 h-4 text-gray-400" /><span>{schedule.employee_names?.join(', ') || 'Não informado'}</span></div>
@@ -692,6 +755,28 @@ export default function Schedule() {
       {/* MODAL ALTERAR STATUS */}
       <Modal isOpen={showStatusModal} onClose={() => setShowStatusModal(false)} title="Alterar Status" size="sm">
         <form onSubmit={handleStatusChange} className="space-y-4"><div><label className="label-premium">Novo Status *</label><select value={statusData.status} onChange={(e) => setStatusData({...statusData, status: e.target.value})} className="select-premium" required><option value="">Selecionar...</option>{STATUS_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}</select></div><div className="flex justify-end gap-3 pt-4 border-t"><button type="button" onClick={() => setShowStatusModal(false)} className="btn-secondary">Cancelar</button><button type="submit" disabled={saving} className="btn-primary">{saving ? 'Salvando...' : 'Salvar'}</button></div></form>
+      </Modal>
+
+      {/* MODAL ATUALIZAR STATUS EM LOTE */}
+      <Modal isOpen={showBulkStatusModal} onClose={() => setShowBulkStatusModal(false)} title="Atualizar Status em Lote" size="sm">
+        <form onSubmit={handleBulkStatusChange} className="space-y-4">
+          <div className="bg-purple-50 p-4 rounded-xl">
+            <p className="text-sm text-purple-800"><strong>{selectedSchedules.length}</strong> agendamento(s) selecionado(s)</p>
+          </div>
+          <div>
+            <label className="label-premium">Novo Status *</label>
+            <select value={bulkStatus} onChange={(e) => setBulkStatus(e.target.value)} className="select-premium" required>
+              <option value="">Selecionar status...</option>
+              {STATUS_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+            </select>
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <button type="button" onClick={() => setShowBulkStatusModal(false)} className="btn-secondary">Cancelar</button>
+            <button type="submit" disabled={saving || !bulkStatus} className="bg-purple-600 text-white px-6 py-2.5 rounded-xl font-medium hover:bg-purple-700">
+              {saving ? 'Atualizando...' : `Atualizar ${selectedSchedules.length} agend.`}
+            </button>
+          </div>
+        </form>
       </Modal>
 
       {/* Legenda */}
