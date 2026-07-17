@@ -9,16 +9,13 @@ async function sendScheduleNotification(phone, message) {
       return { success: false, error: 'WhatsApp não conectado' };
     }
 
-    // Formatar número de telefone (remover caracteres não numéricos e adicionar código do país)
     const formattedPhone = formatPhoneNumber(phone);
     
-    // Verificar se o número é válido
     if (!formattedPhone || formattedPhone.length < 10) {
       console.log('⚠️ Número de telefone inválido:', phone);
       return { success: false, error: 'Número inválido' };
     }
 
-    // Enviar mensagem
     const chat = await client.sendMessage(`${formattedPhone}@c.us`, message);
     
     console.log(`✅ Notificação enviada para ${formattedPhone}`);
@@ -39,7 +36,6 @@ async function sendBulkNotifications(notifications) {
       ...result
     });
     
-    // Pequeno delay entre envios para evitar bloqueio
     await new Promise(resolve => setTimeout(resolve, 1000));
   }
   
@@ -79,15 +75,57 @@ async function sendTestMessage(phone) {
   }
 }
 
+// ========== NOVA FUNÇÃO ==========
+async function sendDailySchedule(phone, date, schedules) {
+  const formattedDate = new Date(date + 'T00:00:00').toLocaleDateString('pt-BR', {
+    weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
+  });
+
+  let message = `📅 *AGENDA DO DIA*\n`;
+  message += `📆 ${formattedDate}\n`;
+  message += `📋 ${schedules.length} atendimentos\n\n`;
+
+  if (schedules.length === 0) {
+    message += `✅ Nenhum atendimento agendado para hoje.\n\n`;
+  } else {
+    schedules.forEach((s, index) => {
+      message += `━━━━━━━━━━━━━━━━\n`;
+      message += `🔹 *${index + 1}.* ${s.client_name || 'N/D'}\n`;
+      message += `🕐 ${s.start_time} às ${s.end_time}\n`;
+      message += `👤 ${s.employee_names?.join(', ') || 'N/D'}\n`;
+      message += `🔧 ${s.service || 'N/D'}\n`;
+      message += `📍 ${s.address || 'N/D'}\n`;
+      if (s.notes) message += `📝 ${s.notes}\n`;
+      message += `📌 Status: ${getStatusLabel(s.status)}\n`;
+    });
+  }
+
+  message += `\n━━━━━━━━━━━━━━━━\n`;
+  message += `🏢 *Casa & Clean - Gestão Operacional*\n`;
+  message += `🔗 agenda.casaeclean.com.br`;
+
+  return await sendScheduleNotification(phone, message);
+}
+
+function getStatusLabel(status) {
+  const labels = {
+    pendente: '🟡 Pendente',
+    confirmado: '🟢 Confirmado',
+    em_andamento: '🔵 Em Andamento',
+    concluido: '✅ Concluído',
+    concluido_ressalva: '⚠️ Concluído c/ Ressalva',
+    cancelado_cliente: '❌ Cancelado',
+    funcionario_faltou: '🚫 Funcionário Faltou'
+  };
+  return labels[status] || status;
+}
+// ========== FIM NOVA FUNÇÃO ==========
+
 function formatPhoneNumber(phone) {
-  // Remove todos os caracteres não numéricos
   let numbers = phone.replace(/\D/g, '');
-  
-  // Se o número não tiver código do país, adiciona 55 (Brasil)
   if (numbers.length === 10 || numbers.length === 11) {
     numbers = '55' + numbers;
   }
-  
   return numbers;
 }
 
@@ -95,5 +133,6 @@ module.exports = {
   sendScheduleNotification,
   sendBulkNotifications,
   checkWhatsAppStatus,
-  sendTestMessage
+  sendTestMessage,
+  sendDailySchedule
 };
