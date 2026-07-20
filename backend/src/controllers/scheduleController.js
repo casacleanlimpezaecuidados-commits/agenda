@@ -287,8 +287,8 @@ const scheduleController = {
 
       const schedulesDetailed = await Promise.all(schedules.map(async (s) => {
         const employees = await Employee.find({ _id: { $in: s.employee_ids } });
-        const scheduleDate = new Date(s.date + 'T00:00:00');
-
+        const scheduleDate = new Date(s.date + 'T12:00:00');
+        
         return {
           date: s.date,
           weekday: weekdays[scheduleDate.getDay()] || '',
@@ -302,10 +302,12 @@ const scheduleController = {
         };
       }));
 
-      const csvHeader = 'Data,Dia,Horário,Serviço,Endereço,Funcionários,Status';
+      // Corrigindo o CSV
+      const csvHeader = 'Data;Dia;Horário;Serviço;Endereço;Funcionários;Status';
       const csvRows = schedulesDetailed.map(s => {
-        const formattedDate = s.date.split('-').reverse().join('/');
-        return `${formattedDate},${s.weekday},${s.start_time}-${s.end_time},${s.service},"${s.address}","${s.employees.join(', ')}",${s.status_label}`;
+        const [year, month, day] = s.date.split('-');
+        const formattedDate = `${day}/${month}/${year}`;
+        return `${formattedDate};${s.weekday};${s.start_time}-${s.end_time};${s.service};"${s.address}";"${s.employees.join(', ')}";${s.status_label}`;
       });
       const exportCsv = [csvHeader, ...csvRows].join('\n');
 
@@ -432,7 +434,7 @@ const scheduleController = {
     }
   },
 
-  // ========== NOVO: Enviar agenda via WhatsApp ==========
+  // Enviar agenda via WhatsApp
   async sendDailyScheduleWhatsApp(req, res) {
     try {
       const { date, phones } = req.body;
@@ -479,7 +481,6 @@ const scheduleController = {
       return res.status(500).json({ error: error.message });
     }
   }
-  // ========== FIM ==========
 };
 
 // Função auxiliar para gerar datas recorrentes
