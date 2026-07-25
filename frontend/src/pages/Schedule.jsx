@@ -22,6 +22,7 @@ import {
   AlertTriangle,
   CheckSquare,
   Square,
+  ExternalLink,
 } from 'lucide-react';
 
 const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -695,6 +696,20 @@ export default function Schedule() {
           )}
         </div>
       )}
+
+      {/* BOTÃO FIXO PARA PORTAL DE CONTAS */}
+      <a 
+        href="http://contas.casaeclean.com.br/" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50 bg-indigo-600 text-white p-4 rounded-full shadow-lg hover:bg-indigo-700 transition-all duration-200 hover:scale-110 group"
+        title="Portal de Contas"
+      >
+        <ExternalLink className="w-6 h-6" />
+        <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-sm px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+          Portal de Contas
+        </span>
+      </a>
 
       {/* MODAL NOVO AGENDAMENTO */}
       <Modal isOpen={showNewModal} onClose={() => { setShowNewModal(false); resetForm(); }} title="Novo Agendamento" size="lg">
