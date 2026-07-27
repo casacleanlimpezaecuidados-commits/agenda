@@ -196,7 +196,7 @@ export default function Schedule() {
       endOfWeek.setDate(startOfWeek.getDate() + 6);
       const filtered = schedules.filter(s => {
         if (!s.date) return false;
-        const scheduleDate = new Date(s.date + 'T00:00:00');
+        const scheduleDate = new Date(s.date + 'T12:00:00');
         return scheduleDate >= startOfWeek && scheduleDate <= endOfWeek;
       });
       setFilteredSchedules(filtered);
