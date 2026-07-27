@@ -287,7 +287,9 @@ const scheduleController = {
 
       const schedulesDetailed = await Promise.all(schedules.map(async (s) => {
         const employees = await Employee.find({ _id: { $in: s.employee_ids } });
-        const scheduleDate = new Date(s.date + 'T12:00:00');
+        // CORREÇÃO: usar T12:00:00 para evitar problemas de fuso horário
+        const [y, m, d] = s.date.split('-').map(Number);
+        const scheduleDate = new Date(y, m - 1, d, 12, 0, 0);
         
         return {
           date: s.date,
@@ -302,7 +304,7 @@ const scheduleController = {
         };
       }));
 
-      // Corrigindo o CSV
+      // CSV com ponto e vírgula para Excel
       const csvHeader = 'Data;Dia;Horário;Serviço;Endereço;Funcionários;Status';
       const csvRows = schedulesDetailed.map(s => {
         const [year, month, day] = s.date.split('-');
@@ -486,8 +488,11 @@ const scheduleController = {
 // Função auxiliar para gerar datas recorrentes
 function generateRecurringDates(startDate, endDate, frequency, daysOfWeek) {
   const dates = [];
-  const start = new Date(startDate + 'T00:00:00');
-  const end = new Date(endDate + 'T23:59:59');
+  // CORREÇÃO: Criar data local sem fuso horário
+  const [sy, sm, sd] = startDate.split('-').map(Number);
+  const [ey, em, ed] = endDate.split('-').map(Number);
+  const start = new Date(sy, sm - 1, sd, 12, 0, 0);
+  const end = new Date(ey, em - 1, ed, 12, 0, 0);
 
   const dayMap = {
     'Dom': 0, 'Seg': 1, 'Ter': 2, 'Qua': 3,
@@ -504,7 +509,11 @@ function generateRecurringDates(startDate, endDate, frequency, daysOfWeek) {
     let current = new Date(start);
     while (current <= end) {
       if (targetDays.includes(current.getDay())) {
-        dates.push(current.toISOString().split('T')[0]);
+        // Formatar data sem fuso horário
+        const y = current.getFullYear();
+        const m = String(current.getMonth() + 1).padStart(2, '0');
+        const d = String(current.getDate()).padStart(2, '0');
+        dates.push(`${y}-${m}-${d}`);
       }
       current.setDate(current.getDate() + 1);
     }
@@ -515,12 +524,18 @@ function generateRecurringDates(startDate, endDate, frequency, daysOfWeek) {
     while (current <= end) {
       if (targetDays.includes(current.getDay())) {
         if (lastFoundDate === null) {
-          dates.push(current.toISOString().split('T')[0]);
+          const y = current.getFullYear();
+          const m = String(current.getMonth() + 1).padStart(2, '0');
+          const d = String(current.getDate()).padStart(2, '0');
+          dates.push(`${y}-${m}-${d}`);
           lastFoundDate = new Date(current);
         } else {
           const diffDays = Math.floor((current - lastFoundDate) / (1000 * 60 * 60 * 24));
           if (diffDays >= 14) {
-            dates.push(current.toISOString().split('T')[0]);
+            const y = current.getFullYear();
+            const m = String(current.getMonth() + 1).padStart(2, '0');
+            const d = String(current.getDate()).padStart(2, '0');
+            dates.push(`${y}-${m}-${d}`);
             lastFoundDate = new Date(current);
           }
         }
@@ -528,11 +543,13 @@ function generateRecurringDates(startDate, endDate, frequency, daysOfWeek) {
       current.setDate(current.getDate() + 1);
     }
   } else if (frequency === 'mensal') {
-    const dayOfMonth = start.getDate();
-    let current = new Date(start.getFullYear(), start.getMonth(), dayOfMonth);
+    let current = new Date(start.getFullYear(), start.getMonth(), start.getDate(), 12, 0, 0);
     while (current <= end) {
       if (current >= start && current <= end) {
-        dates.push(current.toISOString().split('T')[0]);
+        const y = current.getFullYear();
+        const m = String(current.getMonth() + 1).padStart(2, '0');
+        const d = String(current.getDate()).padStart(2, '0');
+        dates.push(`${y}-${m}-${d}`);
       }
       current.setMonth(current.getMonth() + 1);
     }
