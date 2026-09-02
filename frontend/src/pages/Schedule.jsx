@@ -535,8 +535,11 @@ export default function Schedule() {
   };
 
   const changeMonth = (delta) => {
-    setCurrentDate(new Date(currentYear, currentMonth + delta, 1));
+    const newDate = new Date(currentYear, currentMonth + delta, 1);
+    setCurrentDate(newDate);
     setSelectedDate(null);
+    // Carregar agendamentos do novo mês
+    loadSchedules();
   };
 
   const today = new Date();
@@ -672,7 +675,7 @@ export default function Schedule() {
                         className="rounded w-4 h-4 text-purple-600 focus:ring-purple-500" 
                       />
                       <div className="w-10 h-10 bg-primary-50 rounded-xl flex items-center justify-center"><Clock className="w-5 h-5 text-primary-800" /></div>
-                      <div><p className="font-semibold text-gray-900">{schedule.client_name}</p><p className="text-sm text-gray-500">{schedule.date ? new Date(schedule.date + 'T00:00:00').toLocaleDateString('pt-BR') : ''} • {schedule.start_time} - {schedule.end_time}</p></div>
+                      <div><p className="font-semibold text-gray-900">{schedule.client_name}</p><p className="text-sm text-gray-500">{schedule.date ? new Date(schedule.date + 'T12:00:00').toLocaleDateString('pt-BR') : ''} • {schedule.start_time} - {schedule.end_time}</p></div>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <StatusBadge status={schedule.status} />
@@ -750,7 +753,7 @@ export default function Schedule() {
       {/* MODAL SUBSTITUIÇÃO RÁPIDA */}
       <Modal isOpen={showQuickReplaceModal} onClose={() => setShowQuickReplaceModal(false)} title="Substituir Funcionário" size="sm">
         <form onSubmit={handleQuickReplace} className="space-y-4">
-          <div className="bg-gray-50 p-4 rounded-xl space-y-3"><div className="flex items-center gap-2 text-sm"><Building2 className="w-4 h-4 text-gray-400 flex-shrink-0" /><span className="font-medium text-gray-900">{quickReplaceData.client_name}</span></div><div className="flex items-center gap-2 text-sm"><Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" /><span className="text-gray-700">{quickReplaceData.date ? new Date(quickReplaceData.date + 'T00:00:00').toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }) : 'Data não informada'}</span></div><div className="flex items-start gap-2 text-sm"><MapPin className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" /><span className="text-gray-700">{quickReplaceData.address || 'Endereço não informado'}</span></div><div className="flex items-center gap-2 text-sm border-t border-gray-200 pt-2"><Users className="w-4 h-4 text-gray-400 flex-shrink-0" /><div><span className="text-xs text-gray-500 block">Funcionário Atual</span><span className="font-medium text-gray-900">{quickReplaceData.old_employee_name}</span></div></div></div>
+          <div className="bg-gray-50 p-4 rounded-xl space-y-3"><div className="flex items-center gap-2 text-sm"><Building2 className="w-4 h-4 text-gray-400 flex-shrink-0" /><span className="font-medium text-gray-900">{quickReplaceData.client_name}</span></div><div className="flex items-center gap-2 text-sm"><Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" /><span className="text-gray-700">{quickReplaceData.date ? new Date(quickReplaceData.date + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }) : 'Data não informada'}</span></div><div className="flex items-start gap-2 text-sm"><MapPin className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" /><span className="text-gray-700">{quickReplaceData.address || 'Endereço não informado'}</span></div><div className="flex items-center gap-2 text-sm border-t border-gray-200 pt-2"><Users className="w-4 h-4 text-gray-400 flex-shrink-0" /><div><span className="text-xs text-gray-500 block">Funcionário Atual</span><span className="font-medium text-gray-900">{quickReplaceData.old_employee_name}</span></div></div></div>
           <div><label className="label-premium">Substituir por *</label><select value={quickReplaceData.new_employee_id} onChange={(e) => setQuickReplaceData({...quickReplaceData, new_employee_id: e.target.value})} className="select-premium" required><option value="">Selecionar...</option>{employees.filter(e => e._id !== quickReplaceData.old_employee_id).map(emp => <option key={emp._id} value={emp._id}>{emp.name}</option>)}</select></div>
           <div className="bg-amber-50 p-3 rounded-xl text-xs text-amber-700 flex items-start gap-2"><AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" /><span>Substituirá <strong>{quickReplaceData.old_employee_name}</strong> <strong>apenas neste agendamento</strong>.</span></div>
           <div className="flex justify-end gap-3 pt-4 border-t"><button type="button" onClick={() => setShowQuickReplaceModal(false)} className="btn-secondary">Cancelar</button><button type="submit" disabled={saving} className="bg-warning text-white px-6 py-2.5 rounded-xl font-medium hover:bg-amber-600">{saving ? 'Substituindo...' : 'Substituir'}</button></div>
