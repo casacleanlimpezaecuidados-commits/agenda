@@ -2,13 +2,12 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: '/api',
-  timeout: 10000,
+  timeout: 60000, // 60 segundos (antes era 10000)
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Interceptor para adicionar token
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('@casa_clean:token');
   if (token) {
@@ -17,7 +16,6 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Interceptor para tratar erros
 api.interceptors.response.use(
   (response) => response,
   (error) => {
