@@ -539,7 +539,6 @@ export default function Schedule() {
     setCurrentDate(newDate);
     setSelectedDate(null);
     // Carregar agendamentos do novo mês
-    loadSchedules();
   };
 
   const today = new Date();
