@@ -16,10 +16,11 @@ const SERVICE_TYPES = [
   'Diária Completa - Limpeza Pós-Obra', 'Diária Completa - Limpeza de Alojamento',
   'Diária Completa - Limpeza de Escritório', 'Diária Completa - Limpeza de Condomínio',
   'Diária Completa - Limpeza de Igreja', 'Diária Completa - Limpeza de Escola',
+  'Diária Completa - Limpeza de Loja', 'Diária Completa - Limpeza de Loja',
   'Meia Diária - Limpeza Residencial', 'Meia Diária - Limpeza de Apartamento',
   'Meia Diária - Limpeza de Alojamento', 'Meia Diária - Limpeza de Escritório',
   'Meia Diária - Limpeza de Condomínio', 'Meia Diária - Limpeza de Igreja',
-  'Meia Diária - Limpeza de Escola',
+  'Meia Diária - Limpeza de Escola', 'Meia Diária - Limpeza de Loja',
 ];
 
 const STATUS_OPTIONS = [
@@ -557,7 +558,7 @@ export default function Schedule() {
           </button>
           <button onClick={() => setShowRecurrenceEditModal(true)} 
             className="bg-teal-600 text-white px-4 h-10 rounded-xl font-medium hover:bg-teal-700 shadow-soft flex items-center gap-2 whitespace-nowrap transition-all duration-200">
-            <Edit3 className="w-4 h-4 flex-shrink-0" /> Alterar Dias de Atendimento
+            <Edit3 className="w-4 h-4 flex-shrink-0" /> Alterar Dias de Atend.
           </button>
           <button onClick={() => setShowDeleteLoteModal(true)} 
             className="bg-danger text-white px-4 h-10 rounded-xl font-medium hover:bg-red-600 shadow-soft flex items-center gap-2 whitespace-nowrap transition-all duration-200">
