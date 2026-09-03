@@ -78,12 +78,14 @@ export default function Schedule() {
   const [showQuickReplaceModal, setShowQuickReplaceModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteLoteModal, setShowDeleteLoteModal] = useState(false);
+  const [showBulkStatusModal, setShowBulkStatusModal] = useState(false);
+  const [showPermanentReplaceModal, setShowPermanentReplaceModal] = useState(false);
   const [deleteLoteClientId, setDeleteLoteClientId] = useState('');
   const [selectedClientAddresses, setSelectedClientAddresses] = useState([]);
   const [editingSchedule, setEditingSchedule] = useState(null);
   const [selectedSchedules, setSelectedSchedules] = useState([]);
-  const [showBulkStatusModal, setShowBulkStatusModal] = useState(false);
   const [bulkStatus, setBulkStatus] = useState('');
+  const [permanentReplaceData, setPermanentReplaceData] = useState({ old_employee_id: '', new_employee_id: '' });
 
   const [formData, setFormData] = useState({
     client_id: '',
@@ -311,6 +313,21 @@ export default function Schedule() {
     }
   };
 
+  // NOVA FUNÇÃO: Substituição Permanente
+  const handlePermanentReplace = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const response = await api.post('/schedules/replace-employee-permanent', permanentReplaceData);
+      setShowPermanentReplaceModal(false);
+      setPermanentReplaceData({ old_employee_id: '', new_employee_id: '' });
+      await loadSchedules();
+      showNotification(`✅ ${response.data.updated_schedules} agendamentos atualizados!`);
+    } catch (error) {
+      showNotification('❌ Erro: ' + (error.response?.data?.error || error.message), 'error');
+    } finally { setSaving(false); }
+  };
+
   const openQuickReplace = (schedule) => {
     const currentEmployeeName = schedule.employee_names?.join(', ') || 
       (schedule.employee_details && schedule.employee_details.length > 0 
@@ -535,10 +552,8 @@ export default function Schedule() {
   };
 
   const changeMonth = (delta) => {
-    const newDate = new Date(currentYear, currentMonth + delta, 1);
-    setCurrentDate(newDate);
+    setCurrentDate(new Date(currentYear, currentMonth + delta, 1));
     setSelectedDate(null);
-    // Carregar agendamentos do novo mês
   };
 
   const today = new Date();
@@ -566,7 +581,7 @@ export default function Schedule() {
         </div>
       )}
 
-      {/* ========== HEADER CORRIGIDO ========== */}
+      {/* HEADER */}
       <div className="space-y-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Agenda</h1>
@@ -583,6 +598,10 @@ export default function Schedule() {
             className="bg-warning text-white px-4 h-10 rounded-xl font-medium hover:bg-amber-600 shadow-soft flex items-center gap-2 whitespace-nowrap transition-all duration-200">
             <UserCheck className="w-4 h-4 flex-shrink-0" /> Substituir Func.
           </button>
+          <button onClick={() => setShowPermanentReplaceModal(true)} 
+            className="bg-orange-600 text-white px-4 h-10 rounded-xl font-medium hover:bg-orange-700 shadow-soft flex items-center gap-2 whitespace-nowrap transition-all duration-200">
+            <UserCheck className="w-4 h-4 flex-shrink-0" /> Subst. Permanente
+          </button>
           <button onClick={() => setShowDeleteLoteModal(true)} 
             className="bg-danger text-white px-4 h-10 rounded-xl font-medium hover:bg-red-600 shadow-soft flex items-center gap-2 whitespace-nowrap transition-all duration-200">
             <Trash2 className="w-4 h-4 flex-shrink-0" /> Excluir em Lote
@@ -595,8 +614,8 @@ export default function Schedule() {
           )}
         </div>
       </div>
-      {/* ========== FIM HEADER CORRIGIDO ========== */}
 
+      {/* NAVEGAÇÃO */}
       <div className="card-premium p-4">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -618,6 +637,8 @@ export default function Schedule() {
           </div>
         </div>
       </div>
+
+      {/* CALENDÁRIO */}
       {viewMode === 'month' && (
         <div className="card-premium overflow-hidden">
           <div className="grid grid-cols-7 border-b border-gray-100">
@@ -644,6 +665,8 @@ export default function Schedule() {
           </div>
         </div>
       )}
+
+      {/* LISTA SEMANA/DIA */}
       {(viewMode === 'week' || viewMode === 'day') && (
         <div className="card-premium p-6">
           <div className="flex items-center gap-4">
@@ -666,13 +689,7 @@ export default function Schedule() {
                 <div key={idx} className={`p-4 border rounded-xl hover:shadow-soft transition-all ${selectedSchedules.includes(schedule._id) ? 'border-purple-400 bg-purple-50/30' : 'border-gray-100'}`}>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
-                      <input 
-                        type="checkbox" 
-                        checked={selectedSchedules.includes(schedule._id)} 
-                        onChange={() => toggleSelectSchedule(schedule._id)} 
-                        onClick={(e) => e.stopPropagation()} 
-                        className="rounded w-4 h-4 text-purple-600 focus:ring-purple-500" 
-                      />
+                      <input type="checkbox" checked={selectedSchedules.includes(schedule._id)} onChange={() => toggleSelectSchedule(schedule._id)} onClick={(e) => e.stopPropagation()} className="rounded w-4 h-4 text-purple-600 focus:ring-purple-500" />
                       <div className="w-10 h-10 bg-primary-50 rounded-xl flex items-center justify-center"><Clock className="w-5 h-5 text-primary-800" /></div>
                       <div><p className="font-semibold text-gray-900">{schedule.client_name}</p><p className="text-sm text-gray-500">{schedule.date ? new Date(schedule.date + 'T12:00:00').toLocaleDateString('pt-BR') : ''} • {schedule.start_time} - {schedule.end_time}</p></div>
                     </div>
@@ -699,18 +716,11 @@ export default function Schedule() {
         </div>
       )}
 
-      {/* BOTÃO FIXO PARA PORTAL DE CONTAS */}
-      <a 
-        href="http://contas.casaeclean.com.br/" 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 z-50 bg-indigo-600 text-white p-4 rounded-full shadow-lg hover:bg-indigo-700 transition-all duration-200 hover:scale-110 group"
-        title="Portal de Contas"
-      >
+      {/* BOTÃO FIXO - PORTAL DE CONTAS */}
+      <a href="http://contas.casaeclean.com.br/" target="_blank" rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50 bg-indigo-600 text-white p-4 rounded-full shadow-lg hover:bg-indigo-700 transition-all duration-200 hover:scale-110 group" title="Portal de Contas">
         <ExternalLink className="w-6 h-6" />
-        <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-sm px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-          Portal de Contas
-        </span>
+        <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-sm px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">Portal de Contas</span>
       </a>
 
       {/* MODAL NOVO AGENDAMENTO */}
@@ -749,6 +759,18 @@ export default function Schedule() {
         </form>
       </Modal>
 
+      {/* MODAL SUBSTITUIÇÃO PERMANENTE */}
+      <Modal isOpen={showPermanentReplaceModal} onClose={() => setShowPermanentReplaceModal(false)} title="Substituição Permanente" size="sm">
+        <form onSubmit={handlePermanentReplace} className="space-y-4">
+          <div className="bg-orange-50 p-4 rounded-xl text-sm text-orange-800">
+            💡 <strong>Substituição Permanente:</strong> Troca o funcionário em todos os agendamentos futuros.
+          </div>
+          <div><label className="label-premium">Funcionário Atual *</label><select value={permanentReplaceData.old_employee_id} onChange={(e) => setPermanentReplaceData({...permanentReplaceData, old_employee_id: e.target.value})} className="select-premium" required><option value="">Selecionar...</option>{employees.map(emp => <option key={emp._id} value={emp._id}>{emp.name}</option>)}</select></div>
+          <div><label className="label-premium">Novo Funcionário *</label><select value={permanentReplaceData.new_employee_id} onChange={(e) => setPermanentReplaceData({...permanentReplaceData, new_employee_id: e.target.value})} className="select-premium" required><option value="">Selecionar...</option>{employees.filter(e => e._id !== permanentReplaceData.old_employee_id).map(emp => <option key={emp._id} value={emp._id}>{emp.name}</option>)}</select></div>
+          <div className="flex justify-end gap-3 pt-4 border-t"><button type="button" onClick={() => setShowPermanentReplaceModal(false)} className="btn-secondary">Cancelar</button><button type="submit" disabled={saving} className="bg-orange-600 text-white px-6 py-2.5 rounded-xl font-medium hover:bg-orange-700">{saving ? 'Substituindo...' : 'Substituir Permanentemente'}</button></div>
+        </form>
+      </Modal>
+
       {/* MODAL SUBSTITUIÇÃO RÁPIDA */}
       <Modal isOpen={showQuickReplaceModal} onClose={() => setShowQuickReplaceModal(false)} title="Substituir Funcionário" size="sm">
         <form onSubmit={handleQuickReplace} className="space-y-4">
@@ -777,22 +799,9 @@ export default function Schedule() {
       {/* MODAL ATUALIZAR STATUS EM LOTE */}
       <Modal isOpen={showBulkStatusModal} onClose={() => setShowBulkStatusModal(false)} title="Atualizar Status em Lote" size="sm">
         <form onSubmit={handleBulkStatusChange} className="space-y-4">
-          <div className="bg-purple-50 p-4 rounded-xl">
-            <p className="text-sm text-purple-800"><strong>{selectedSchedules.length}</strong> agendamento(s) selecionado(s)</p>
-          </div>
-          <div>
-            <label className="label-premium">Novo Status *</label>
-            <select value={bulkStatus} onChange={(e) => setBulkStatus(e.target.value)} className="select-premium" required>
-              <option value="">Selecionar status...</option>
-              {STATUS_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-            </select>
-          </div>
-          <div className="flex justify-end gap-3 pt-4 border-t">
-            <button type="button" onClick={() => setShowBulkStatusModal(false)} className="btn-secondary">Cancelar</button>
-            <button type="submit" disabled={saving || !bulkStatus} className="bg-purple-600 text-white px-6 py-2.5 rounded-xl font-medium hover:bg-purple-700">
-              {saving ? 'Atualizando...' : `Atualizar ${selectedSchedules.length} agend.`}
-            </button>
-          </div>
+          <div className="bg-purple-50 p-4 rounded-xl"><p className="text-sm text-purple-800"><strong>{selectedSchedules.length}</strong> agendamento(s) selecionado(s)</p></div>
+          <div><label className="label-premium">Novo Status *</label><select value={bulkStatus} onChange={(e) => setBulkStatus(e.target.value)} className="select-premium" required><option value="">Selecionar status...</option>{STATUS_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}</select></div>
+          <div className="flex justify-end gap-3 pt-4 border-t"><button type="button" onClick={() => setShowBulkStatusModal(false)} className="btn-secondary">Cancelar</button><button type="submit" disabled={saving || !bulkStatus} className="bg-purple-600 text-white px-6 py-2.5 rounded-xl font-medium hover:bg-purple-700">{saving ? 'Atualizando...' : `Atualizar ${selectedSchedules.length} agend.`}</button></div>
         </form>
       </Modal>
 
