@@ -9,34 +9,22 @@ import {
 } from 'lucide-react';
 
 const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-const MONTHS = [
-  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-];
+const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
 const SERVICE_TYPES = [
-  'Diária Completa - Limpeza Residencial',
-  'Diária Completa - Limpeza de Apartamento',
-  'Diária Completa - Limpeza Pós-Obra',
-  'Diária Completa - Limpeza de Alojamento',
-  'Diária Completa - Limpeza de Escritório',
-  'Diária Completa - Limpeza de Condomínio',
-  'Diária Completa - Limpeza de Igreja',
-  'Diária Completa - Limpeza de Escola',
-  'Meia Diária - Limpeza Residencial',
-  'Meia Diária - Limpeza de Apartamento',
-  'Meia Diária - Limpeza de Alojamento',
-  'Meia Diária - Limpeza de Escritório',
-  'Meia Diária - Limpeza de Condomínio',
-  'Meia Diária - Limpeza de Igreja',
+  'Diária Completa - Limpeza Residencial', 'Diária Completa - Limpeza de Apartamento',
+  'Diária Completa - Limpeza Pós-Obra', 'Diária Completa - Limpeza de Alojamento',
+  'Diária Completa - Limpeza de Escritório', 'Diária Completa - Limpeza de Condomínio',
+  'Diária Completa - Limpeza de Igreja', 'Diária Completa - Limpeza de Escola',
+  'Meia Diária - Limpeza Residencial', 'Meia Diária - Limpeza de Apartamento',
+  'Meia Diária - Limpeza de Alojamento', 'Meia Diária - Limpeza de Escritório',
+  'Meia Diária - Limpeza de Condomínio', 'Meia Diária - Limpeza de Igreja',
   'Meia Diária - Limpeza de Escola',
 ];
 
 const STATUS_OPTIONS = [
-  { value: 'pendente', label: 'Pendente' },
-  { value: 'confirmado', label: 'Confirmado' },
-  { value: 'em_andamento', label: 'Em Andamento' },
-  { value: 'concluido', label: 'Concluído' },
+  { value: 'pendente', label: 'Pendente' }, { value: 'confirmado', label: 'Confirmado' },
+  { value: 'em_andamento', label: 'Em Andamento' }, { value: 'concluido', label: 'Concluído' },
   { value: 'concluido_ressalva', label: 'Concluído c/ Ressalva' },
   { value: 'cancelado_cliente', label: 'Cancelado pelo Cliente' },
   { value: 'funcionario_faltou', label: 'Funcionário Faltou' },
@@ -62,14 +50,12 @@ export default function Schedule() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteLoteModal, setShowDeleteLoteModal] = useState(false);
   const [showBulkStatusModal, setShowBulkStatusModal] = useState(false);
-  const [showPermanentReplaceModal, setShowPermanentReplaceModal] = useState(false);
   const [showRecurrenceEditModal, setShowRecurrenceEditModal] = useState(false);
   const [deleteLoteClientId, setDeleteLoteClientId] = useState('');
   const [selectedClientAddresses, setSelectedClientAddresses] = useState([]);
   const [editingSchedule, setEditingSchedule] = useState(null);
   const [selectedSchedules, setSelectedSchedules] = useState([]);
   const [bulkStatus, setBulkStatus] = useState('');
-  const [permanentReplaceData, setPermanentReplaceData] = useState({ old_employee_id: '', new_employee_id: '' });
   const [recurrenceEditData, setRecurrenceEditData] = useState({
     client_id: '',
     address: '',
@@ -78,50 +64,24 @@ export default function Schedule() {
   });
 
   const [formData, setFormData] = useState({
-    client_id: '',
-    employee_ids: [],
-    date: '',
-    start_time: '07:00',
-    end_time: '17:00',
-    service: 'Limpeza Comercial',
-    address: '',
-    notes: '',
+    client_id: '', employee_ids: [], date: '', start_time: '07:00', end_time: '17:00',
+    service: 'Limpeza Comercial', address: '', notes: '',
   });
 
   const [recurringData, setRecurringData] = useState({
-    client_id: '',
-    employee_ids: [],
-    start_date: '',
-    end_date: '',
-    frequency: 'semanal',
-    days_of_week: [],
-    start_time: '07:00',
-    end_time: '17:00',
-    service: 'Limpeza Comercial',
-    address: '',
-    notes: '',
+    client_id: '', employee_ids: [], start_date: '', end_date: '',
+    frequency: 'semanal', days_of_week: [], start_time: '07:00', end_time: '17:00',
+    service: 'Limpeza Comercial', address: '', notes: '',
   });
 
   const [replaceData, setReplaceData] = useState({
-    client_id: '',
-    address: '',
-    old_employee_id: '',
-    new_employee_id: '',
+    client_id: '', address: '', old_employee_id: '', new_employee_id: '',
   });
 
-  const [statusData, setStatusData] = useState({
-    schedule_id: null,
-    status: '',
-  });
-
+  const [statusData, setStatusData] = useState({ schedule_id: null, status: '' });
   const [quickReplaceData, setQuickReplaceData] = useState({
-    schedule_id: null,
-    client_name: '',
-    address: '',
-    date: '',
-    old_employee_id: '',
-    old_employee_name: '',
-    new_employee_id: '',
+    schedule_id: null, client_name: '', address: '', date: '',
+    old_employee_id: '', old_employee_name: '', new_employee_id: '',
   });
 
   const currentMonth = currentDate.getMonth();
@@ -150,7 +110,9 @@ export default function Schedule() {
   const loadClients = async () => {
     try {
       const response = await api.get('/clients', { params: { active: true } });
-      setClients(response.data);
+      // Ordenar clientes em ordem alfabética
+      const sorted = response.data.sort((a, b) => a.name.localeCompare(b.name));
+      setClients(sorted);
     } catch (error) {
       console.error('Erro ao carregar clientes:', error);
     }
@@ -159,7 +121,9 @@ export default function Schedule() {
   const loadEmployees = async () => {
     try {
       const response = await api.get('/employees', { params: { active: true } });
-      setEmployees(response.data);
+      // Ordenar funcionários em ordem alfabética
+      const sorted = response.data.sort((a, b) => a.name.localeCompare(b.name));
+      setEmployees(sorted);
     } catch (error) {
       console.error('Erro ao carregar funcionários:', error);
     }
@@ -301,20 +265,6 @@ export default function Schedule() {
     } finally {
       setSaving(false);
     }
-  };
-
-  const handlePermanentReplace = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      const response = await api.post('/schedules/replace-employee-permanent', permanentReplaceData);
-      setShowPermanentReplaceModal(false);
-      setPermanentReplaceData({ old_employee_id: '', new_employee_id: '' });
-      await loadSchedules();
-      showNotification(`✅ ${response.data.updated_schedules} agendamentos atualizados!`);
-    } catch (error) {
-      showNotification('❌ Erro: ' + (error.response?.data?.error || error.message), 'error');
-    } finally { setSaving(false); }
   };
 
   const handleUpdateRecurrenceDays = async (e) => {
@@ -605,13 +555,9 @@ export default function Schedule() {
             className="bg-warning text-white px-4 h-10 rounded-xl font-medium hover:bg-amber-600 shadow-soft flex items-center gap-2 whitespace-nowrap transition-all duration-200">
             <UserCheck className="w-4 h-4 flex-shrink-0" /> Substituir Func.
           </button>
-          <button onClick={() => setShowPermanentReplaceModal(true)} 
-            className="bg-orange-600 text-white px-4 h-10 rounded-xl font-medium hover:bg-orange-700 shadow-soft flex items-center gap-2 whitespace-nowrap transition-all duration-200">
-            <UserCheck className="w-4 h-4 flex-shrink-0" /> Subst. Permanente
-          </button>
           <button onClick={() => setShowRecurrenceEditModal(true)} 
             className="bg-teal-600 text-white px-4 h-10 rounded-xl font-medium hover:bg-teal-700 shadow-soft flex items-center gap-2 whitespace-nowrap transition-all duration-200">
-            <Edit3 className="w-4 h-4 flex-shrink-0" /> Alterar Dias
+            <Edit3 className="w-4 h-4 flex-shrink-0" /> Alterar Dias de Atendimento
           </button>
           <button onClick={() => setShowDeleteLoteModal(true)} 
             className="bg-danger text-white px-4 h-10 rounded-xl font-medium hover:bg-red-600 shadow-soft flex items-center gap-2 whitespace-nowrap transition-all duration-200">
@@ -770,23 +716,11 @@ export default function Schedule() {
         </form>
       </Modal>
 
-      {/* MODAL SUBSTITUIÇÃO PERMANENTE */}
-      <Modal isOpen={showPermanentReplaceModal} onClose={() => setShowPermanentReplaceModal(false)} title="Substituição Permanente" size="sm">
-        <form onSubmit={handlePermanentReplace} className="space-y-4">
-          <div className="bg-orange-50 p-4 rounded-xl text-sm text-orange-800">
-            💡 <strong>Substituição Permanente:</strong> Troca o funcionário em todos os agendamentos futuros.
-          </div>
-          <div><label className="label-premium">Funcionário Atual *</label><select value={permanentReplaceData.old_employee_id} onChange={(e) => setPermanentReplaceData({...permanentReplaceData, old_employee_id: e.target.value})} className="select-premium" required><option value="">Selecionar...</option>{employees.map(emp => <option key={emp._id} value={emp._id}>{emp.name}</option>)}</select></div>
-          <div><label className="label-premium">Novo Funcionário *</label><select value={permanentReplaceData.new_employee_id} onChange={(e) => setPermanentReplaceData({...permanentReplaceData, new_employee_id: e.target.value})} className="select-premium" required><option value="">Selecionar...</option>{employees.filter(e => e._id !== permanentReplaceData.old_employee_id).map(emp => <option key={emp._id} value={emp._id}>{emp.name}</option>)}</select></div>
-          <div className="flex justify-end gap-3 pt-4 border-t"><button type="button" onClick={() => setShowPermanentReplaceModal(false)} className="btn-secondary">Cancelar</button><button type="submit" disabled={saving} className="bg-orange-600 text-white px-6 py-2.5 rounded-xl font-medium hover:bg-orange-700">{saving ? 'Substituindo...' : 'Substituir Permanentemente'}</button></div>
-        </form>
-      </Modal>
-
-      {/* MODAL ALTERAR DIAS */}
+      {/* MODAL ALTERAR DIAS DE ATENDIMENTO */}
       <Modal isOpen={showRecurrenceEditModal} onClose={() => setShowRecurrenceEditModal(false)} title="Alterar Dias de Atendimento" size="lg">
         <form onSubmit={handleUpdateRecurrenceDays} className="space-y-4">
           <div className="bg-teal-50 p-4 rounded-xl text-sm text-teal-800">
-            💡 <strong>Alterar Dias:</strong> Recria todos os agendamentos futuros nos novos dias selecionados.
+            💡 <strong>Alterar Dias de Atendimento:</strong> Recria todos os agendamentos futuros nos novos dias selecionados.
           </div>
           <div><label className="label-premium">Empresa/Cliente *</label><select value={recurrenceEditData.client_id} onChange={(e) => { const clientId = e.target.value; setRecurrenceEditData({...recurrenceEditData, client_id: clientId}); if (clientId) { const client = clients.find(c => c._id === clientId); setSelectedClientAddresses(client?.addresses || []); } }} className="select-premium" required><option value="">Selecionar cliente...</option>{clients.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}</select></div>
           {selectedClientAddresses.length > 0 && (<div><label className="label-premium">Endereço</label><select value={recurrenceEditData.address} onChange={(e) => setRecurrenceEditData({...recurrenceEditData, address: e.target.value})} className="select-premium"><option value="">Todos os endereços</option>{selectedClientAddresses.map((addr, idx) => (<option key={idx} value={addr.street}>{addr.street}</option>))}</select></div>)}
