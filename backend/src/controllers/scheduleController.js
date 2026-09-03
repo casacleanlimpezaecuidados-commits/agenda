@@ -29,11 +29,7 @@ const scheduleController = {
           client_name: client ? client.name : 'N/A',
           client_phone: client ? client.phone : '',
           employee_names: employees.map(e => e.name),
-          employee_details: employees.map(e => ({
-            id: e._id,
-            name: e.name,
-            role: e.role
-          }))
+          employee_details: employees.map(e => ({ id: e._id, name: e.name, role: e.role }))
         };
       }));
 
@@ -58,36 +54,23 @@ const scheduleController = {
       }
 
       const duplicate = await Schedule.findOne({
-        client_id,
-        date,
-        start_time,
-        address: address || '',
+        client_id, date, start_time, address: address || '',
         status: { $in: ['pendente', 'confirmado', 'em_andamento'] }
       });
 
       if (duplicate) {
-        return res.status(409).json({
-          error: 'Já existe um agendamento para este cliente na mesma data, horário e endereço'
-        });
+        return res.status(409).json({ error: 'Já existe um agendamento para este cliente na mesma data, horário e endereço' });
       }
 
       const schedule = await Schedule.create({
-        client_id,
-        employee_ids,
-        date,
-        start_time,
-        end_time,
-        service,
-        address: address || '',
-        notes: notes || '',
-        status: 'pendente',
-        created_by: req.user.id
+        client_id, employee_ids, date, start_time, end_time,
+        service, address: address || '', notes: notes || '',
+        status: 'pendente', created_by: req.user.id
       });
 
       const client = await Client.findById(client_id);
       await History.create({
-        schedule_id: schedule._id,
-        user_id: req.user.id,
+        schedule_id: schedule._id, user_id: req.user.id,
         action: 'criou_agendamento',
         new_value: `${date} - ${start_time} - ${client?.name || 'N/A'}`,
         timestamp: new Date()
@@ -103,10 +86,7 @@ const scheduleController = {
   // Criar recorrência
   async createRecurring(req, res) {
     try {
-      const {
-        client_id, employee_ids, start_date, end_date,
-        frequency, days_of_week, start_time, end_time, service, address, notes
-      } = req.body;
+      const { client_id, employee_ids, start_date, end_date, frequency, days_of_week, start_time, end_time, service, address, notes } = req.body;
 
       if (!client_id || !start_date || !end_date || !frequency || !days_of_week || !start_time || !end_time || !service) {
         return res.status(400).json({ error: 'Campos obrigatórios faltando' });
@@ -125,16 +105,9 @@ const scheduleController = {
       const createdSchedules = [];
       for (const date of generatedDates) {
         const schedule = await Schedule.create({
-          client_id,
-          employee_ids,
-          date,
-          start_time,
-          end_time,
-          service,
-          address: address || '',
-          notes: notes || '',
-          status: 'pendente',
-          created_by: req.user.id
+          client_id, employee_ids, date, start_time, end_time,
+          service, address: address || '', notes: notes || '',
+          status: 'pendente', created_by: req.user.id
         });
         createdSchedules.push(schedule);
       }
@@ -147,10 +120,7 @@ const scheduleController = {
         timestamp: new Date()
       });
 
-      return res.status(201).json({
-        schedules: createdSchedules,
-        total_generated: createdSchedules.length
-      });
+      return res.status(201).json({ schedules: createdSchedules, total_generated: createdSchedules.length });
     } catch (error) {
       console.error('Erro ao criar recorrência:', error);
       return res.status(500).json({ error: error.message });
@@ -161,39 +131,29 @@ const scheduleController = {
   async updateStatus(req, res) {
     try {
       const { status } = req.body;
-      const validStatuses = [
-        'pendente', 'confirmado', 'em_andamento', 'concluido',
-        'concluido_ressalva', 'cancelado_cliente', 'funcionario_faltou'
-      ];
+      const validStatuses = ['pendente', 'confirmado', 'em_andamento', 'concluido', 'concluido_ressalva', 'cancelado_cliente', 'funcionario_faltou'];
 
       if (!validStatuses.includes(status)) {
         return res.status(400).json({ error: 'Status inválido' });
       }
 
       const schedule = await Schedule.findById(req.params.id);
-      if (!schedule) {
-        return res.status(404).json({ error: 'Agendamento não encontrado' });
-      }
+      if (!schedule) return res.status(404).json({ error: 'Agendamento não encontrado' });
 
       const oldStatus = schedule.status;
       schedule.status = status;
       await schedule.save();
 
       await History.create({
-        schedule_id: schedule._id,
-        user_id: req.user.id,
-        action: 'alterou_status',
-        old_value: oldStatus,
-        new_value: status,
+        schedule_id: schedule._id, user_id: req.user.id,
+        action: 'alterou_status', old_value: oldStatus, new_value: status,
         timestamp: new Date()
       });
 
       if (['concluido', 'concluido_ressalva'].includes(status)) {
         await Confirmation.create({
-          schedule_id: schedule._id,
-          employee_id: req.user.id,
-          status: status,
-          confirmed_at: new Date()
+          schedule_id: schedule._id, employee_id: req.user.id,
+          status: status, confirmed_at: new Date()
         });
       }
 
@@ -214,9 +174,7 @@ const scheduleController = {
       }
 
       let query = { employee_ids: old_employee_id };
-      if (start_date && end_date) {
-        query.date = { $gte: start_date, $lte: end_date };
-      }
+      if (start_date && end_date) query.date = { $gte: start_date, $lte: end_date };
 
       const schedules = await Schedule.find(query);
       let updatedCount = 0;
@@ -232,17 +190,132 @@ const scheduleController = {
       await History.create({
         user_id: req.user.id,
         action: 'substituiu_funcionario',
-        old_value: old_employee_id,
-        new_value: new_employee_id,
+        old_value: old_employee_id, new_value: new_employee_id,
+        timestamp: new Date()
+      });
+
+      return res.json({ message: 'Substituição realizada com sucesso', updated_schedules: updatedCount });
+    } catch (error) {
+      console.error('Erro ao substituir:', error);
+      return res.status(500).json({ error: error.message });
+    }
+  },
+
+  // Substituição permanente
+  async replaceEmployeePermanent(req, res) {
+    try {
+      const { old_employee_id, new_employee_id } = req.body;
+
+      if (!old_employee_id || !new_employee_id) {
+        return res.status(400).json({ error: 'IDs obrigatórios' });
+      }
+
+      const today = new Date().toISOString().split('T')[0];
+
+      const schedules = await Schedule.find({
+        employee_ids: old_employee_id,
+        date: { $gte: today },
+        status: { $in: ['pendente', 'confirmado', 'em_andamento'] }
+      });
+
+      let updatedCount = 0;
+
+      for (const schedule of schedules) {
+        schedule.employee_ids = schedule.employee_ids.map(id =>
+          id.toString() === old_employee_id.toString() ? new_employee_id : id
+        );
+        await schedule.save();
+        updatedCount++;
+      }
+
+      await History.create({
+        user_id: req.user.id,
+        action: 'substituicao_permanente',
+        old_value: old_employee_id, new_value: new_employee_id,
         timestamp: new Date()
       });
 
       return res.json({
-        message: 'Substituição realizada com sucesso',
-        updated_schedules: updatedCount
+        message: 'Substituição permanente realizada com sucesso',
+        updated_schedules: updatedCount,
+        period: `A partir de ${today}`
       });
     } catch (error) {
-      console.error('Erro ao substituir:', error);
+      console.error('Erro na substituição permanente:', error);
+      return res.status(500).json({ error: error.message });
+    }
+  },
+
+  // Alterar dias de recorrência
+  async updateRecurrenceDays(req, res) {
+    try {
+      const { client_id, address, old_days, new_days } = req.body;
+
+      if (!client_id || !new_days || !new_days.length) {
+        return res.status(400).json({ error: 'Cliente e novos dias são obrigatórios' });
+      }
+
+      const today = new Date().toISOString().split('T')[0];
+
+      let query = {
+        client_id,
+        date: { $gte: today },
+        status: { $in: ['pendente', 'confirmado', 'em_andamento'] }
+      };
+
+      if (address) {
+        query.address = { $regex: address, $options: 'i' };
+      }
+
+      const schedules = await Schedule.find(query);
+
+      if (schedules.length === 0) {
+        return res.status(404).json({
+          error: 'Nenhum agendamento futuro encontrado para este cliente/endereço',
+          suggestion: 'Crie uma nova recorrência com os novos dias'
+        });
+      }
+
+      const deleteResult = await Schedule.deleteMany(query);
+
+      const newSchedules = [];
+      const firstSchedule = schedules[0];
+      const lastDate = schedules[schedules.length - 1].date;
+
+      const generatedDates = generateRecurringDates(today, lastDate, 'semanal', new_days);
+
+      for (const date of generatedDates) {
+        const schedule = await Schedule.create({
+          client_id,
+          employee_ids: firstSchedule.employee_ids,
+          date,
+          start_time: firstSchedule.start_time,
+          end_time: firstSchedule.end_time,
+          service: firstSchedule.service,
+          address: firstSchedule.address,
+          notes: firstSchedule.notes || '',
+          status: 'pendente',
+          created_by: req.user.id
+        });
+        newSchedules.push(schedule);
+      }
+
+      await History.create({
+        user_id: req.user.id,
+        action: 'alterou_dias_recorrencia',
+        old_value: old_days?.join(', ') || 'N/A',
+        new_value: new_days.join(', '),
+        timestamp: new Date()
+      });
+
+      return res.json({
+        message: 'Recorrência alterada com sucesso',
+        removed: deleteResult.deletedCount,
+        created: newSchedules.length,
+        new_days: new_days
+      });
+    } catch (error) {
+      console.error('Erro ao alterar recorrência:', error);
       return res.status(500).json({ error: error.message });
     }
   },
@@ -257,16 +330,13 @@ const scheduleController = {
       }
 
       const client = await Client.findById(client_id);
-      if (!client) {
-        return res.status(404).json({ error: 'Cliente não encontrado' });
-      }
+      if (!client) return res.status(404).json({ error: 'Cliente não encontrado' });
 
       const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
       const endDate = `${year}-${String(month).padStart(2, '0')}-31`;
 
       const schedules = await Schedule.find({
-        client_id,
-        date: { $gte: startDate, $lte: endDate }
+        client_id, date: { $gte: startDate, $lte: endDate }
       }).sort({ date: 1 });
 
       const weekdays = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
@@ -287,10 +357,9 @@ const scheduleController = {
 
       const schedulesDetailed = await Promise.all(schedules.map(async (s) => {
         const employees = await Employee.find({ _id: { $in: s.employee_ids } });
-        // CORREÇÃO: usar T12:00:00 para evitar problemas de fuso horário
         const [y, m, d] = s.date.split('-').map(Number);
         const scheduleDate = new Date(y, m - 1, d, 12, 0, 0);
-        
+
         return {
           date: s.date,
           weekday: weekdays[scheduleDate.getDay()] || '',
@@ -304,7 +373,6 @@ const scheduleController = {
         };
       }));
 
-      // CSV com ponto e vírgula para Excel
       const csvHeader = 'Data;Dia;Horário;Serviço;Endereço;Funcionários;Status';
       const csvRows = schedulesDetailed.map(s => {
         const [year, month, day] = s.date.split('-');
@@ -330,18 +398,12 @@ const scheduleController = {
   async getById(req, res) {
     try {
       const schedule = await Schedule.findById(req.params.id);
-      if (!schedule) {
-        return res.status(404).json({ error: 'Agendamento não encontrado' });
-      }
+      if (!schedule) return res.status(404).json({ error: 'Agendamento não encontrado' });
 
       const client = await Client.findById(schedule.client_id);
       const employees = await Employee.find({ _id: { $in: schedule.employee_ids } });
 
-      return res.json({
-        ...schedule.toObject(),
-        client_details: client,
-        employee_details: employees
-      });
+      return res.json({ ...schedule.toObject(), client_details: client, employee_details: employees });
     } catch (error) {
       return res.status(500).json({ error: error.message });
     }
@@ -363,13 +425,10 @@ const scheduleController = {
 
       const schedule = await Schedule.findByIdAndUpdate(req.params.id, updateData, { new: true });
 
-      if (!schedule) {
-        return res.status(404).json({ error: 'Agendamento não encontrado' });
-      }
+      if (!schedule) return res.status(404).json({ error: 'Agendamento não encontrado' });
 
       await History.create({
-        schedule_id: schedule._id,
-        user_id: req.user.id,
+        schedule_id: schedule._id, user_id: req.user.id,
         action: 'atualizou_agendamento',
         new_value: `${schedule.date} - ${schedule.start_time}`,
         timestamp: new Date()
@@ -386,16 +445,13 @@ const scheduleController = {
     try {
       const schedule = await Schedule.findByIdAndDelete(req.params.id);
 
-      if (!schedule) {
-        return res.status(404).json({ error: 'Agendamento não encontrado' });
-      }
+      if (!schedule) return res.status(404).json({ error: 'Agendamento não encontrado' });
 
       const client = await Client.findById(schedule.client_id);
       const clientName = client ? client.name : 'Cliente desconhecido';
 
       await History.create({
-        schedule_id: req.params.id,
-        user_id: req.user.id,
+        schedule_id: req.params.id, user_id: req.user.id,
         action: 'removeu_agendamento',
         old_value: `${schedule.date} - ${schedule.start_time} - ${clientName}`,
         new_value: 'Agendamento excluído',
@@ -440,7 +496,7 @@ const scheduleController = {
   async sendDailyScheduleWhatsApp(req, res) {
     try {
       const { date, phones } = req.body;
-      
+
       if (!date || !phones || !phones.length) {
         return res.status(400).json({ error: 'Data e telefones são obrigatórios' });
       }
@@ -459,7 +515,7 @@ const scheduleController = {
       }));
 
       const { sendDailySchedule } = require('../services/whatsappService');
-      
+
       let sent = 0;
       let errors = 0;
 
@@ -488,7 +544,6 @@ const scheduleController = {
 // Função auxiliar para gerar datas recorrentes
 function generateRecurringDates(startDate, endDate, frequency, daysOfWeek) {
   const dates = [];
-  // CORREÇÃO: Criar data local sem fuso horário
   const [sy, sm, sd] = startDate.split('-').map(Number);
   const [ey, em, ed] = endDate.split('-').map(Number);
   const start = new Date(sy, sm - 1, sd, 12, 0, 0);
@@ -501,15 +556,12 @@ function generateRecurringDates(startDate, endDate, frequency, daysOfWeek) {
     'Quinta': 4, 'Sexta': 5, 'Sábado': 6, 'Domingo': 0
   };
 
-  const targetDays = daysOfWeek.map(d =>
-    dayMap[d] !== undefined ? dayMap[d] : parseInt(d)
-  );
+  const targetDays = daysOfWeek.map(d => dayMap[d] !== undefined ? dayMap[d] : parseInt(d));
 
   if (frequency === 'semanal') {
     let current = new Date(start);
     while (current <= end) {
       if (targetDays.includes(current.getDay())) {
-        // Formatar data sem fuso horário
         const y = current.getFullYear();
         const m = String(current.getMonth() + 1).padStart(2, '0');
         const d = String(current.getDate()).padStart(2, '0');
@@ -543,7 +595,8 @@ function generateRecurringDates(startDate, endDate, frequency, daysOfWeek) {
       current.setDate(current.getDate() + 1);
     }
   } else if (frequency === 'mensal') {
-    let current = new Date(start.getFullYear(), start.getMonth(), start.getDate(), 12, 0, 0);
+    const dayOfMonth = start.getDate();
+    let current = new Date(start.getFullYear(), start.getMonth(), dayOfMonth, 12, 0, 0);
     while (current <= end) {
       if (current >= start && current <= end) {
         const y = current.getFullYear();

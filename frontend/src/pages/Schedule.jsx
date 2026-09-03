@@ -3,26 +3,9 @@ import api from '../services/api';
 import Modal from '../components/Common/Modal';
 import StatusBadge from '../components/Common/StatusBadge';
 import {
-  Plus,
-  Repeat,
-  UserCheck,
-  Calendar,
-  ChevronLeft,
-  ChevronRight,
-  Clock,
-  MapPin,
-  Users,
-  Phone,
-  X,
-  RefreshCw,
-  Trash2,
-  Edit3,
-  Building2,
-  CheckCircle2,
-  AlertTriangle,
-  CheckSquare,
-  Square,
-  ExternalLink,
+  Plus, Repeat, UserCheck, Calendar, ChevronLeft, ChevronRight,
+  Clock, MapPin, Users, Phone, X, RefreshCw, Trash2, Edit3,
+  Building2, CheckCircle2, AlertTriangle, CheckSquare, Square, ExternalLink,
 } from 'lucide-react';
 
 const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -80,12 +63,19 @@ export default function Schedule() {
   const [showDeleteLoteModal, setShowDeleteLoteModal] = useState(false);
   const [showBulkStatusModal, setShowBulkStatusModal] = useState(false);
   const [showPermanentReplaceModal, setShowPermanentReplaceModal] = useState(false);
+  const [showRecurrenceEditModal, setShowRecurrenceEditModal] = useState(false);
   const [deleteLoteClientId, setDeleteLoteClientId] = useState('');
   const [selectedClientAddresses, setSelectedClientAddresses] = useState([]);
   const [editingSchedule, setEditingSchedule] = useState(null);
   const [selectedSchedules, setSelectedSchedules] = useState([]);
   const [bulkStatus, setBulkStatus] = useState('');
   const [permanentReplaceData, setPermanentReplaceData] = useState({ old_employee_id: '', new_employee_id: '' });
+  const [recurrenceEditData, setRecurrenceEditData] = useState({
+    client_id: '',
+    address: '',
+    old_days: [],
+    new_days: [],
+  });
 
   const [formData, setFormData] = useState({
     client_id: '',
@@ -313,7 +303,6 @@ export default function Schedule() {
     }
   };
 
-  // NOVA FUNÇÃO: Substituição Permanente
   const handlePermanentReplace = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -323,6 +312,24 @@ export default function Schedule() {
       setPermanentReplaceData({ old_employee_id: '', new_employee_id: '' });
       await loadSchedules();
       showNotification(`✅ ${response.data.updated_schedules} agendamentos atualizados!`);
+    } catch (error) {
+      showNotification('❌ Erro: ' + (error.response?.data?.error || error.message), 'error');
+    } finally { setSaving(false); }
+  };
+
+  const handleUpdateRecurrenceDays = async (e) => {
+    e.preventDefault();
+    if (recurrenceEditData.new_days.length === 0) {
+      showNotification('❌ Selecione pelo menos um dia', 'error');
+      return;
+    }
+    setSaving(true);
+    try {
+      const response = await api.post('/schedules/update-recurrence-days', recurrenceEditData);
+      setShowRecurrenceEditModal(false);
+      setRecurrenceEditData({ client_id: '', address: '', old_days: [], new_days: [] });
+      await loadSchedules();
+      showNotification(`✅ ${response.data.created} agendamentos criados nos novos dias!`);
     } catch (error) {
       showNotification('❌ Erro: ' + (error.response?.data?.error || error.message), 'error');
     } finally { setSaving(false); }
@@ -602,6 +609,10 @@ export default function Schedule() {
             className="bg-orange-600 text-white px-4 h-10 rounded-xl font-medium hover:bg-orange-700 shadow-soft flex items-center gap-2 whitespace-nowrap transition-all duration-200">
             <UserCheck className="w-4 h-4 flex-shrink-0" /> Subst. Permanente
           </button>
+          <button onClick={() => setShowRecurrenceEditModal(true)} 
+            className="bg-teal-600 text-white px-4 h-10 rounded-xl font-medium hover:bg-teal-700 shadow-soft flex items-center gap-2 whitespace-nowrap transition-all duration-200">
+            <Edit3 className="w-4 h-4 flex-shrink-0" /> Alterar Dias
+          </button>
           <button onClick={() => setShowDeleteLoteModal(true)} 
             className="bg-danger text-white px-4 h-10 rounded-xl font-medium hover:bg-red-600 shadow-soft flex items-center gap-2 whitespace-nowrap transition-all duration-200">
             <Trash2 className="w-4 h-4 flex-shrink-0" /> Excluir em Lote
@@ -768,6 +779,20 @@ export default function Schedule() {
           <div><label className="label-premium">Funcionário Atual *</label><select value={permanentReplaceData.old_employee_id} onChange={(e) => setPermanentReplaceData({...permanentReplaceData, old_employee_id: e.target.value})} className="select-premium" required><option value="">Selecionar...</option>{employees.map(emp => <option key={emp._id} value={emp._id}>{emp.name}</option>)}</select></div>
           <div><label className="label-premium">Novo Funcionário *</label><select value={permanentReplaceData.new_employee_id} onChange={(e) => setPermanentReplaceData({...permanentReplaceData, new_employee_id: e.target.value})} className="select-premium" required><option value="">Selecionar...</option>{employees.filter(e => e._id !== permanentReplaceData.old_employee_id).map(emp => <option key={emp._id} value={emp._id}>{emp.name}</option>)}</select></div>
           <div className="flex justify-end gap-3 pt-4 border-t"><button type="button" onClick={() => setShowPermanentReplaceModal(false)} className="btn-secondary">Cancelar</button><button type="submit" disabled={saving} className="bg-orange-600 text-white px-6 py-2.5 rounded-xl font-medium hover:bg-orange-700">{saving ? 'Substituindo...' : 'Substituir Permanentemente'}</button></div>
+        </form>
+      </Modal>
+
+      {/* MODAL ALTERAR DIAS */}
+      <Modal isOpen={showRecurrenceEditModal} onClose={() => setShowRecurrenceEditModal(false)} title="Alterar Dias de Atendimento" size="lg">
+        <form onSubmit={handleUpdateRecurrenceDays} className="space-y-4">
+          <div className="bg-teal-50 p-4 rounded-xl text-sm text-teal-800">
+            💡 <strong>Alterar Dias:</strong> Recria todos os agendamentos futuros nos novos dias selecionados.
+          </div>
+          <div><label className="label-premium">Empresa/Cliente *</label><select value={recurrenceEditData.client_id} onChange={(e) => { const clientId = e.target.value; setRecurrenceEditData({...recurrenceEditData, client_id: clientId}); if (clientId) { const client = clients.find(c => c._id === clientId); setSelectedClientAddresses(client?.addresses || []); } }} className="select-premium" required><option value="">Selecionar cliente...</option>{clients.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}</select></div>
+          {selectedClientAddresses.length > 0 && (<div><label className="label-premium">Endereço</label><select value={recurrenceEditData.address} onChange={(e) => setRecurrenceEditData({...recurrenceEditData, address: e.target.value})} className="select-premium"><option value="">Todos os endereços</option>{selectedClientAddresses.map((addr, idx) => (<option key={idx} value={addr.street}>{addr.street}</option>))}</select></div>)}
+          <div><label className="label-premium">Novos Dias de Atendimento *</label><div className="grid grid-cols-7 gap-2">{WEEKDAYS.map(day => (<button key={day} type="button" onClick={() => { const days = [...recurrenceEditData.new_days]; if (days.includes(day)) { setRecurrenceEditData({...recurrenceEditData, new_days: days.filter(d => d !== day)}); } else { setRecurrenceEditData({...recurrenceEditData, new_days: [...days, day]}); } }} className={`px-2 py-2 text-xs rounded-lg border transition-all ${recurrenceEditData.new_days.includes(day) ? 'bg-teal-600 text-white border-teal-600' : 'bg-white text-gray-600 border-gray-200'}`}>{day}</button>))}</div></div>
+          <div className="bg-teal-50 p-3 rounded-xl text-xs text-teal-700">⚠️ Todos os agendamentos futuros serão recriados nos novos dias selecionados.</div>
+          <div className="flex justify-end gap-3 pt-4 border-t"><button type="button" onClick={() => setShowRecurrenceEditModal(false)} className="btn-secondary">Cancelar</button><button type="submit" disabled={saving} className="bg-teal-600 text-white px-6 py-2.5 rounded-xl font-medium hover:bg-teal-700">{saving ? 'Alterando...' : 'Alterar Dias'}</button></div>
         </form>
       </Modal>
 
