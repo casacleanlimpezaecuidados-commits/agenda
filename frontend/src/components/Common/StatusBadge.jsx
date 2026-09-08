@@ -4,7 +4,8 @@ import {
   PlayCircle, 
   XCircle, 
   AlertTriangle,
-  UserX 
+  UserX,
+  CalendarDays
 } from 'lucide-react';
 
 const statusConfig = {
@@ -28,10 +29,10 @@ const statusConfig = {
     icon: CheckCircle2,
     className: 'badge-success',
   },
-  concluido_ressalva: {
-    label: 'C/ Ressalva',
-    icon: AlertTriangle,
-    className: 'badge-warning',
+  feriado: {
+    label: 'Feriado',
+    icon: CalendarDays,
+    className: 'badge-info',
   },
   cancelado_cliente: {
     label: 'Cancelado',
