@@ -24,6 +24,7 @@ async function createSupervisor() {
   const supervisores = [
     { name: 'Antonio', email: 'liberatoa068@gmail.com' },
     { name: 'Cida', email: 'cida7181@gmail.com' },
+    { name: 'Dione', email: 'dione@gmail.com' },
     // Adicione mais aqui:
     // { name: 'Supervisor 2', email: 'supervisor2@casaclean.com' },
   ];
